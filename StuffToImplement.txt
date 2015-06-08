@@ -1,0 +1,20 @@
+Easy (>=4)
+Multiple Light Sources
+Color Filter
+Cell Shading
+Gaussian Blur
+
+Maybe
+Frustrum Culling
+Spotlight
+
+Medium (>=2)
+Bloom
+God Rays (Volumetric Lighting)
+
+Maybe
+Shadow Mapping
+Reflection
+
+Hard (>=1)
+HDR Lighting and Tone Mapping
