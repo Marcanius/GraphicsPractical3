@@ -1,16 +1,17 @@
 Easy (>=4)
-Multiple Light Sources
-Color Filter
-Cell Shading
-Gaussian Blur
+Multiple Light Sources			Quinten
+Cell Shading					Quinten
+
+Color Filter					Timo
+Gaussian Blur					Timo
 
 Maybe
 Frustrum Culling
 Spotlight
 
 Medium (>=2)
-Bloom
-God Rays (Volumetric Lighting)
+Bloom							Timo, Matthijs
+God Rays (Volumetric Lighting)	Quinten, Matthijs
 
 Maybe
 Shadow Mapping
@@ -18,3 +19,5 @@ Reflection
 
 Hard (>=1)
 HDR Lighting and Tone Mapping
+
+Camera van P1 halen				Matthijs
