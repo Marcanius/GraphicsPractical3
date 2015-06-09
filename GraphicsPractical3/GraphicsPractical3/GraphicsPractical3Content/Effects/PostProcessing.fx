@@ -44,9 +44,18 @@ float4 GaussianBlur() : COLOR0
 
 }
 
-float4 ColorFilter() : COLOR0
-{
-	
+float4 ColorFilter(float2 TexCoord : TEXCOORD0) : COLOR0
+{ 
+	// Sample each pixel from the completed screen render.
+	float4 input = tex2D(TextureSampler, TexCoord);
+
+	float4 output = input;
+
+	output.r = 0.30 * input.r + 0.59 * input.g + 0.11 * input.b;
+	output.g = 0.30 * input.r + 0.59 * input.g + 0.11 * input.b;
+	output.b = 0.30 * input.r + 0.59 * input.g + 0.11 * input.b;
+
+	return output;
 }
 
 technique Technique1
@@ -54,7 +63,7 @@ technique Technique1
 	pass Pass1
 	{
 		VertexShader = compile vs_3_0 SpriteVertexShader();
-		PixelShader = compile ps_3_0 GammaCorrection();
+		PixelShader = compile ps_3_0 ColorFilter();
 	}
 }
 
