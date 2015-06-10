@@ -30,6 +30,55 @@ class Camera
         this.updateViewMatrix();
     }
 
+    public void Update(GameTime gT)
+    {
+        // The time since the last update.
+        float timeStep = (float)gT.ElapsedGameTime.TotalSeconds;
+        deltaAngleH = 0;
+        deltaAngleV = 0;
+
+        // Checking for keyboard input and applying its interaction.
+        KeyboardState kbState = Keyboard.GetState();
+
+        // Check to see if the Left Arrow Key is pressed.
+        if (kbState.IsKeyDown(Keys.Left))
+            deltaAngleH += -turnSpeed * timeStep;
+        // Check to see if the Right Arrow Key is pressed.
+        if (kbState.IsKeyDown(Keys.Right))
+            deltaAngleH += turnSpeed * timeStep;
+        // Check to see of the Up Arrow Key is pressed.
+        if (kbState.IsKeyDown(Keys.Up))
+            deltaAngleV += -turnSpeed * timeStep;
+        // Check to see if the Right Arrow Key is pressed.
+        if (kbState.IsKeyDown(Keys.Down))
+            deltaAngleV += turnSpeed * timeStep;
+
+        // Check to see if the matrix needs to be adjusted with a new angle.
+        if (deltaAngleH != 0 || deltaAngleV != 0)
+        {
+            angleH += deltaAngleH;
+            angleV = MathHelper.Clamp(angleV - deltaAngleV, -MathHelper.PiOver2 + 0.01F, MathHelper.PiOver2 - 0.01F);
+
+            UpdateFocus();
+        }
+
+        // Movements in the X,Z-plane.
+        if (kbState.IsKeyDown(Keys.W))
+            moveCamera(timeStep, new Vector3((float)Math.Cos(angleH), 0, (float)Math.Sin(angleH)) * moveSpeed);
+        if (kbState.IsKeyDown(Keys.A))
+            moveCamera(timeStep, new Vector3((float)Math.Sin(angleH), 0, -(float)Math.Cos(angleH)) * moveSpeed);
+        if (kbState.IsKeyDown(Keys.S))
+            moveCamera(timeStep, new Vector3(-(float)Math.Cos(angleH), 0, -(float)Math.Sin(angleH)) * moveSpeed);
+        if (kbState.IsKeyDown(Keys.D))
+            moveCamera(timeStep, new Vector3(-(float)Math.Sin(angleH), 0, (float)Math.Cos(angleH)) * moveSpeed);
+
+        // Movement along the Y-axis.
+        if (kbState.IsKeyDown(Keys.Space))
+            moveCamera(timeStep, new Vector3(0, 1, 0) * moveSpeed);
+        if (kbState.IsKeyDown(Keys.LeftShift))
+            moveCamera(timeStep, new Vector3(0, -1, 0) * moveSpeed);
+    }
+
     /// <summary>
     /// Recalculates the view matrix from the up, eye and focus vectors.
     /// </summary>
