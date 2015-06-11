@@ -4,20 +4,27 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 /// <summary>
 /// This class is used to control the camera and calculate the corresponding view and projection matrices.
 /// </summary>
 class Camera
 {
-    // Camera properties
+    // Camera properties.
     private Vector3 up;
     private Vector3 eye;
     private Vector3 focus;
 
-    // Calculated matrices
+    // Calculated matrices.
     private Matrix viewMatrix;
     private Matrix projectionMatrix;
+
+    // Variables related to camera movement.
+    float deltaAngleH, deltaAngleV;
+    float angleH, angleV;
+    float turnSpeed = 2, moveSpeed = 15;
+
 
     public Camera(Vector3 camEye, Vector3 camFocus, Vector3 camUp, float aspectRatio = 4.0f / 3.0f)
     {
@@ -26,10 +33,12 @@ class Camera
         this.focus = camFocus;
 
         // Create matrices.
-        this.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspectRatio, 1.0f, 300.0f);
+        this.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspectRatio, 1f, 300.0f);
         this.updateViewMatrix();
+        this.UpdateFocus();
     }
 
+    #region Movement
     public void Update(GameTime gT)
     {
         // The time since the last update.
@@ -64,20 +73,38 @@ class Camera
 
         // Movements in the X,Z-plane.
         if (kbState.IsKeyDown(Keys.W))
-            moveCamera(timeStep, new Vector3((float)Math.Cos(angleH), 0, (float)Math.Sin(angleH)) * moveSpeed);
+            moveCamera(timeStep, new Vector3((float)Math.Cos(angleH), 0, (float)Math.Sin(angleH)));
         if (kbState.IsKeyDown(Keys.A))
-            moveCamera(timeStep, new Vector3((float)Math.Sin(angleH), 0, -(float)Math.Cos(angleH)) * moveSpeed);
+            moveCamera(timeStep, new Vector3((float)Math.Sin(angleH), 0, -(float)Math.Cos(angleH)));
         if (kbState.IsKeyDown(Keys.S))
-            moveCamera(timeStep, new Vector3(-(float)Math.Cos(angleH), 0, -(float)Math.Sin(angleH)) * moveSpeed);
+            moveCamera(timeStep, new Vector3(-(float)Math.Cos(angleH), 0, -(float)Math.Sin(angleH)));
         if (kbState.IsKeyDown(Keys.D))
-            moveCamera(timeStep, new Vector3(-(float)Math.Sin(angleH), 0, (float)Math.Cos(angleH)) * moveSpeed);
+            moveCamera(timeStep, new Vector3(-(float)Math.Sin(angleH), 0, (float)Math.Cos(angleH)));
 
         // Movement along the Y-axis.
         if (kbState.IsKeyDown(Keys.Space))
-            moveCamera(timeStep, new Vector3(0, 1, 0) * moveSpeed);
+            moveCamera(timeStep, new Vector3(0, 1, 0));
         if (kbState.IsKeyDown(Keys.LeftShift))
-            moveCamera(timeStep, new Vector3(0, -1, 0) * moveSpeed);
+            moveCamera(timeStep, new Vector3(0, -1, 0));
     }
+
+    private void moveCamera(float TimeStep, Vector3 Direction)
+    {
+        this.Eye = this.Eye + Direction * moveSpeed * TimeStep;
+        this.Focus = this.Focus + Direction * moveSpeed * TimeStep;
+    }
+
+    /// <summary>
+    /// Updates the focus of the camera, using both the horizontal and the vertical angle to place the focus at the correct position in front of the camera.
+    /// </summary>
+    private void UpdateFocus()
+    {
+        Vector3 relativeFocus = new Vector3((float)Math.Cos(angleH), 0, (float)Math.Sin(angleH));
+        relativeFocus = new Vector3(relativeFocus.X * (float)Math.Cos(angleV), (float)Math.Sin(angleV), relativeFocus.Z * (float)Math.Cos(angleV));
+
+        Focus = Eye + relativeFocus;
+    }
+    #endregion
 
     /// <summary>
     /// Recalculates the view matrix from the up, eye and focus vectors.

@@ -11,6 +11,7 @@ sampler TextureSampler = sampler_state
 {
 	Texture = < screenGrab >;
 };
+
 //--------------------------------------- The Vertex Shader---------------------------------------\\
 
 void SpriteVertexShader(
