@@ -1,8 +1,12 @@
 
 // The value for the gamma correction.
 float gamma;
+
 // The transformation Matrix for the vertex shader.
 float4x4 MatrixTransform;
+
+// Booleans for the different post processes.
+bool grayScale;
 
 // Texture deets
 Texture2D screenGrab;
@@ -49,6 +53,9 @@ float4 ColorFilter(float2 TexCoord : TEXCOORD0) : COLOR0
 { 
 	// Sample each pixel from the completed screen render.
 	float4 input = tex2D(TextureSampler, TexCoord);
+
+	if (!grayScale)
+		return input;
 
 	float4 output = input;
 

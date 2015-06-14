@@ -10,20 +10,23 @@ float4x4 View;
 float4x4 Projection;
 float4x4 WorldIT;
 
-// Light Sources
+// Light Sources.
 float3 LightPositions[Max_Lights];
 float4 LightColors[Max_Lights];
 
-// Ambient Lighting
+// Ambient Lighting.
 float4 AmbientColor;
 float AmbientIntensity;
 
-// Diffuse Lighting
+// Diffuse Lighting.
 float DiffuseIntensity;
 
-// Specular Lighting
+// Specular Lighting.
 float4 SpecularColor;
 float SpecularIntensity, SpecularPower;
+
+// Cell Shading.
+bool cellShading;
 
 // --------------------------------------- Shader Inputs --------------------------------------- \\
 
@@ -44,13 +47,9 @@ struct VertexShaderOutput
 
 float4 DiffuseShading(float3 Position, float3 Normal, float3 LightPosition, float4 LightColor)
 {
-	float4 result = LightColor;
-
 	float LdotNN = dot(normalize(LightPosition - Position), Normal);
 
-	result = result*(DiffuseIntensity*max(0.0f, LdotNN));
-
-	return result;
+	return LightColor * (DiffuseIntensity * max(0.0f, LdotNN));
 }
 
 // --------------------------------------- The Vertex Shader --------------------------------------- \\
@@ -63,7 +62,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 		float4 viewPosition = mul(worldPosition, View);
 		output.Position = mul(viewPosition, Projection);
 
-	output.Position3D = input.Position;
+	output.Position3D = mul(input.Position, World);
 	output.Normal = input.Normal;
 
 	return output;
@@ -84,6 +83,13 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		output.r = max(output.r, comparison.r);
 		output.g = max(output.g, comparison.g);
 		output.b = max(output.b, comparison.b);
+	}
+
+	if (cellShading)
+	{
+		output.r = float((int)(output.r * 10)) / 10;
+		output.g = float((int)(output.g * 10)) / 10;
+		output.b = float((int)(output.b * 10)) / 10;
 	}
 
 	return output;

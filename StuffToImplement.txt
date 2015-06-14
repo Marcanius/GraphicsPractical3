@@ -1,23 +1,21 @@
 Easy (>=4)
-Multiple Light Sources			Quinten
-Cell Shading					Quinten
+DONE - Multiple Light Sources			Quinten
+DONE - Cell Shading						Quinten
 
-Color Filter					Timo
-Gaussian Blur					Timo
+DONE - 	Color Filter					Timo
+!DONE -	Gaussian Blur					Timo
 
 Maybe
-Frustrum Culling
-Spotlight
+!DONE - Frustrum Culling
+!DONE - Spotlight
 
 Medium (>=2)
-Bloom							Timo, Matthijs
-God Rays (Volumetric Lighting)	Quinten, Matthijs
+!DONE - Bloom							Timo, Matthijs
+!DONE - God Rays (Volumetric Lighting)	Quinten, Matthijs
 
 Maybe
-Shadow Mapping
-Reflection
+!DONE - Shadow Mapping
+!DONE - Reflection
 
 Hard (>=1)
-HDR Lighting and Tone Mapping
-
-Camera van P1 halen				Matthijs
+!DONE - HDR Lighting and Tone Mapping

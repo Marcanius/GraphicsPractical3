@@ -16,6 +16,11 @@ public partial class Game1 : Game
     Matrix World;
     Vector3[] LightPositions;
     Vector4[] LightColors;
+    bool cellShading;
+
+    // PostProcessing booleans.
+    float gamma;
+    bool greyScale;
 
     private void FillLightingParameters(Effect effect)
     {
@@ -25,6 +30,7 @@ public partial class Game1 : Game
         effect.Parameters["World"].SetValue(World);
         // WorldIT
         effect.Parameters["WorldIT"].SetValue(Matrix.Transpose(Matrix.Invert(World)));
+        // The arrays of lights.
         effect.Parameters["LightPositions"].SetValue(LightPositions);
         effect.Parameters["LightColors"].SetValue(LightColors);
         effect.Parameters["AmbientColor"].SetValue(Color.Tomato.ToVector4());
@@ -33,5 +39,17 @@ public partial class Game1 : Game
         effect.Parameters["SpecularColor"].SetValue(Color.White.ToVector4());
         effect.Parameters["SpecularIntensity"].SetValue(2.0f);
         effect.Parameters["SpecularPower"].SetValue(25.0f);
+
+        // Whether we use cell shading.
+        effect.Parameters["cellShading"].SetValue(cellShading);
+    }
+
+    private void FillPostParameters(Effect effect)
+    {
+        // Gamma Correction.
+        effect.Parameters["gamma"].SetValue(this.gamma);
+
+        // GreyScaling.
+        effect.Parameters["grayScale"].SetValue(this.greyScale);
     }
 }

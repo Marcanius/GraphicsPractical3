@@ -24,8 +24,14 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
     Model bunny;
     Model head;
 
+    // The quad.
+    private VertexPositionNormalTexture[] quadVertices;
+    private short[] quadIndices;
+    private Matrix quadTransform;
+
     // Lighting
     Effect lighting;
+    MovingLight[] lights;
 
     // Post-Processing.
     Effect postProcessing;
@@ -57,7 +63,7 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         this.graphics.ApplyChanges();
 
         // Initialize the camera, located at (-100, 0, 0), and looking at the origin.
-        this.camera = new Camera(new Vector3(-100, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
+        this.camera = new Camera(new Vector3(-20, 10, 0), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
 
         // Make the cursor visible on screen.
         this.IsMouseVisible = true;
@@ -88,22 +94,21 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         // Fill the parameters.
         World = Matrix.CreateScale(0.5f);
 
+        // Creating the moving lights.
+        lights = new MovingLight[5];
+        lights[0] = new MovingLight(new Vector3(020, 20, 000), 10.0f, Color.WhiteSmoke.ToVector4());
+        lights[1] = new MovingLight(new Vector3(000, 20, 000), 10.0f, Color.Tomato.ToVector4());
+        lights[2] = new MovingLight(new Vector3(000, 20, 020), 10.0f, Color.GreenYellow.ToVector4());
+        lights[3] = new MovingLight(new Vector3(-20, 20, 000), 10.0f, Color.DarkBlue.ToVector4());
+        lights[4] = new MovingLight(new Vector3(000, 20, -20), 10.0f, Color.HotPink.ToVector4());
+
         // The positions of the multiple lights.
         LightPositions = new Vector3[5];
-        LightPositions[0] = new Vector3(100, 0, 0);
-        LightPositions[1] = new Vector3(0, 100, 0);
-        LightPositions[2] = new Vector3(0, 0, 100);
-        LightPositions[3] = new Vector3(-100, 0, 0);
-        LightPositions[4] = new Vector3(0, 0, -100);
 
         // The colors of the multiple lights.
         LightColors = new Vector4[5];
-        LightColors[0] = Color.WhiteSmoke.ToVector4();
-        LightColors[1] = Color.Tomato.ToVector4();
-        LightColors[2] = Color.GreenYellow.ToVector4();
-        LightColors[3] = Color.DarkBlue.ToVector4();
-        LightColors[4] = Color.HotPink.ToVector4();
 
+        cellShading = true;
         FillLightingParameters(lighting);
 
         // Load the models.
@@ -113,9 +118,14 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         head = this.Content.Load<Model>("Models/femalehead");
         head.Meshes[0].MeshParts[0].Effect = lighting;
 
-        // Load the PostProcesssing effect, and fill its parameter.
+        setupQuad();
+
+        // Load the PostProcesssing effect, and fill its parameters.
         postProcessing = this.Content.Load<Effect>("Effects/PostProcessing");
-        postProcessing.Parameters["gamma"].SetValue(1.0f);
+
+        gamma = 1.0f;
+        greyScale = false;
+        FillPostParameters(postProcessing);
     }
 
     protected override void Update(GameTime gameTime)
@@ -124,7 +134,26 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             this.Exit();
 
+        // Update the position of the camera.
         this.camera.Update(gameTime);
+
+        // Update the positions and colors of the lights.
+        for (int i = 1; i < lights.Length; i++)
+        {
+            lights[i].Update(gameTime);
+
+            LightPositions[0] = lights[0].Position;
+            LightPositions[1] = lights[1].Position;
+            LightPositions[2] = lights[2].Position;
+            LightPositions[3] = lights[3].Position;
+            LightPositions[4] = lights[4].Position;
+
+            LightColors[0] = lights[0].Color;
+            LightColors[1] = lights[1].Color;
+            LightColors[2] = lights[2].Color;
+            LightColors[3] = lights[3].Color;
+            LightColors[4] = lights[4].Color;
+        }
 
         // Update the window title.
         this.Window.Title = "XNA Renderer | FPS: " + this.frameRateCounter.FrameRate;
@@ -166,22 +195,64 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         base.Draw(gameTime);
     }
 
+    /// <summary>
+    /// Sets up a 2 by 2 quad around the origin.
+    /// </summary>
+    private void setupQuad()
+    {
+        float scale = 5.0f;
+
+        // Normal points up
+        Vector3 quadNormal = new Vector3(0, 1, 0);
+
+        this.quadVertices = new VertexPositionNormalTexture[4];
+        // Top left
+        this.quadVertices[0].Position = new Vector3(-100, 0, -100);
+        this.quadVertices[0].Normal = quadNormal;
+        this.quadVertices[0].TextureCoordinate = new Vector2(0, 0);
+        // Top right
+        this.quadVertices[1].Position = new Vector3(100, 0, -100);
+        this.quadVertices[1].Normal = quadNormal;
+        this.quadVertices[1].TextureCoordinate = new Vector2(3, 0);
+        // Bottom left
+        this.quadVertices[2].Position = new Vector3(-100, 0, 100);
+        this.quadVertices[2].Normal = quadNormal;
+        this.quadVertices[2].TextureCoordinate = new Vector2(0, 3);
+        // Bottom right
+        this.quadVertices[3].Position = new Vector3(100, 0, 100);
+        this.quadVertices[3].Normal = quadNormal;
+        this.quadVertices[3].TextureCoordinate = new Vector2(3, 3);
+
+        this.quadIndices = new short[] { 0, 1, 2, 1, 2, 3 };
+        this.quadTransform = Matrix.CreateScale(scale);
+    }
+
     protected void DrawScene(Matrix World)
     {
         // Get a clear background.
         GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.DeepSkyBlue, 1.0f, 0);
 
-        // Draw the quad.
+        // Prepare The Quad.
+        lighting.CurrentTechnique = lighting.Techniques["Technique1"];
+        World = quadTransform * Matrix.CreateTranslation(Vector3.Zero);
+        FillLightingParameters(lighting);
+        camera.SetEffectParameters(lighting);
 
+        foreach (EffectPass pass in lighting.CurrentTechnique.Passes)
+            pass.Apply();
+
+        // Draw the Quad.
+        this.GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, quadVertices,
+            0, quadVertices.Length, quadIndices, 0, this.quadIndices.Length / 3);
 
         // Draw the bunny.
-        DrawModel(bunny, World);
+        DrawModel(bunny, 10.0f, new Vector3(2, 10, 3));
 
         // Draw the head.
-        DrawModel(head, World);
+        DrawModel(head, 0.1f, new Vector3(0, 10, 0));
     }
 
-    public void DrawModel(Model Model, Matrix World)
+    public void DrawModel(Model Model, float Scale, Vector3 Translation)
     {
         // Get the mesh. 
         ModelMesh mesh = Model.Meshes[0];
@@ -189,8 +260,12 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         Effect effect = mesh.Effects[0];
 
         // Set the effect parameters.
-        camera.SetEffectParameters(effect);
+        World = Matrix.CreateScale(Scale) * Matrix.CreateTranslation(Translation);
+        FillLightingParameters(effect);
+
+        //camera.SetEffectParameters(effect);
         effect.CurrentTechnique = effect.Techniques["Technique1"];
+
         foreach (EffectPass p in effect.CurrentTechnique.Passes)
             p.Apply();
 
