@@ -87,9 +87,9 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	if (cellShading)
 	{
-		output.r = float((int)(output.r * 10)) / 10;
-		output.g = float((int)(output.g * 10)) / 10;
-		output.b = float((int)(output.b * 10)) / 10;
+		output.r = float((int)(output.r * 3)) / 3;
+		output.g = float((int)(output.g * 3)) / 3;
+		output.b = float((int)(output.b * 3)) / 3;
 	}
 
 	return output;

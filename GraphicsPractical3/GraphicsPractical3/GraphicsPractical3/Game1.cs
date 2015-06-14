@@ -63,7 +63,7 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         this.graphics.ApplyChanges();
 
         // Initialize the camera, located at (-100, 0, 0), and looking at the origin.
-        this.camera = new Camera(new Vector3(-20, 10, 0), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
+        this.camera = new Camera(new Vector3(0, 15, 15), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
 
         // Make the cursor visible on screen.
         this.IsMouseVisible = true;
@@ -96,19 +96,30 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
 
         // Creating the moving lights.
         lights = new MovingLight[5];
-        lights[0] = new MovingLight(new Vector3(020, 20, 000), 10.0f, Color.WhiteSmoke.ToVector4());
-        lights[1] = new MovingLight(new Vector3(000, 20, 000), 10.0f, Color.Tomato.ToVector4());
-        lights[2] = new MovingLight(new Vector3(000, 20, 020), 10.0f, Color.GreenYellow.ToVector4());
-        lights[3] = new MovingLight(new Vector3(-20, 20, 000), 10.0f, Color.DarkBlue.ToVector4());
-        lights[4] = new MovingLight(new Vector3(000, 20, -20), 10.0f, Color.HotPink.ToVector4());
+        lights[0] = new MovingLight(new Vector3(000, 13, 000), 2, 0, Color.IndianRed.ToVector4());
+        lights[1] = new MovingLight(new Vector3(000, 13, 000), -4, .25f, Color.LimeGreen.ToVector4());
+        lights[2] = new MovingLight(new Vector3(000, 13, 000), 6, .5f, Color.SkyBlue.ToVector4());
+        lights[3] = new MovingLight(new Vector3(-00, 13, 000), -8, .75f, Color.Fuchsia.ToVector4());
+        lights[4] = new MovingLight(new Vector3(000, 13, -00), 10, 1f, Color.Cyan.ToVector4());
 
         // The positions of the multiple lights.
         LightPositions = new Vector3[5];
+        LightPositions[0] = lights[0].Position;
+        LightPositions[1] = lights[1].Position;
+        LightPositions[2] = lights[2].Position;
+        LightPositions[3] = lights[3].Position;
+        LightPositions[4] = lights[4].Position;
 
         // The colors of the multiple lights.
         LightColors = new Vector4[5];
+        LightColors[0] = lights[0].Color;
+        LightColors[1] = lights[1].Color;
+        LightColors[2] = lights[2].Color;
+        LightColors[3] = lights[3].Color;
+        LightColors[4] = lights[4].Color;
 
-        cellShading = true;
+        cellShading = false;
+
         FillLightingParameters(lighting);
 
         // Load the models.
@@ -138,7 +149,7 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         this.camera.Update(gameTime);
 
         // Update the positions and colors of the lights.
-        for (int i = 1; i < lights.Length; i++)
+        for (int i = 0; i < lights.Length; i++)
         {
             lights[i].Update(gameTime);
 
@@ -207,19 +218,19 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
 
         this.quadVertices = new VertexPositionNormalTexture[4];
         // Top left
-        this.quadVertices[0].Position = new Vector3(-100, 0, -100);
+        this.quadVertices[0].Position = new Vector3(-10000, 0, -10000);
         this.quadVertices[0].Normal = quadNormal;
         this.quadVertices[0].TextureCoordinate = new Vector2(0, 0);
         // Top right
-        this.quadVertices[1].Position = new Vector3(100, 0, -100);
+        this.quadVertices[1].Position = new Vector3(10000, 0, -10000);
         this.quadVertices[1].Normal = quadNormal;
         this.quadVertices[1].TextureCoordinate = new Vector2(3, 0);
         // Bottom left
-        this.quadVertices[2].Position = new Vector3(-100, 0, 100);
+        this.quadVertices[2].Position = new Vector3(-10000, 0, 10000);
         this.quadVertices[2].Normal = quadNormal;
         this.quadVertices[2].TextureCoordinate = new Vector2(0, 3);
         // Bottom right
-        this.quadVertices[3].Position = new Vector3(100, 0, 100);
+        this.quadVertices[3].Position = new Vector3(10000, 0, 10000);
         this.quadVertices[3].Normal = quadNormal;
         this.quadVertices[3].TextureCoordinate = new Vector2(3, 3);
 

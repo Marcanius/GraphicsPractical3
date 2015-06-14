@@ -33,7 +33,7 @@ public partial class Game1 : Game
         // The arrays of lights.
         effect.Parameters["LightPositions"].SetValue(LightPositions);
         effect.Parameters["LightColors"].SetValue(LightColors);
-        effect.Parameters["AmbientColor"].SetValue(Color.Tomato.ToVector4());
+        effect.Parameters["AmbientColor"].SetValue(Color.DarkBlue.ToVector4());
         effect.Parameters["AmbientIntensity"].SetValue(0.2f);
         effect.Parameters["DiffuseIntensity"].SetValue(1.0f);
         effect.Parameters["SpecularColor"].SetValue(Color.White.ToVector4());
