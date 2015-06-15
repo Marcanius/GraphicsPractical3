@@ -19,3 +19,6 @@ Maybe
 
 Hard (>=1)
 !DONE - HDR Lighting and Tone Mapping
+
+Resources:
+http://fabiensanglard.net/lightScattering/index.php

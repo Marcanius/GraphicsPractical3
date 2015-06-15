@@ -18,9 +18,12 @@ public partial class Game1 : Game
     Vector4[] LightColors;
     bool cellShading;
 
-    // PostProcessing booleans.
-    float gamma;
-    bool greyScale;
+    // PostProcessing Parameters.
+    string currentTechnique = "ColorFilter";
+    bool greyScale, gaussian, bloom, godRays, HDR;
+    float gamma = 1.0f;
+    Vector3 SunPosition = new Vector3(0, 0, 0);
+    Vector2 SunScreenPos;
 
     private void FillLightingParameters(Effect effect)
     {
@@ -46,10 +49,17 @@ public partial class Game1 : Game
 
     private void FillPostParameters(Effect effect)
     {
+        // Current Technique
+        effect.CurrentTechnique = effect.Techniques[currentTechnique];
+
         // Gamma Correction.
         effect.Parameters["gamma"].SetValue(this.gamma);
-
-        // GreyScaling.
-        effect.Parameters["grayScale"].SetValue(this.greyScale);
+        
+        // GodRays
+        effect.Parameters["SunScreenPos"].SetValue(this.SunScreenPos);
+        effect.Parameters["Density"].SetValue(0.8f);
+        effect.Parameters["Weight"].SetValue(5f);
+        effect.Parameters["Exposure"].SetValue(.01f);
+        effect.Parameters["Decay"].SetValue(0.9f);
     }
 }
