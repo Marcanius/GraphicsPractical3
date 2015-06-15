@@ -29,6 +29,11 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
     private short[] quadIndices;
     private Matrix quadTransform;
 
+    // The box
+    private List<VertexPositionNormalTexture[]> boxes;
+    private short[] boxIndices;
+    private Matrix boxTransform;
+
     // Lighting
     Effect lighting;
     MovingLight[] lights;
@@ -130,6 +135,13 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         head.Meshes[0].MeshParts[0].Effect = lighting;
 
         setupQuad();
+
+        boxes = new List<VertexPositionNormalTexture[]>();
+        for (int i = 0; i < 5; i++)
+        {
+            boxes.Add(setUpBoxes(new Vector3(100 + 23 * i, 5 - 2.5f * i, -200 - 3 * i), new VertexPositionNormalTexture[8]));
+            
+        }
 
         // Load the PostProcesssing effect, and fill its parameters.
         postProcessing = this.Content.Load<Effect>("Effects/PostProcessing");
@@ -234,8 +246,56 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         this.quadVertices[3].Normal = quadNormal;
         this.quadVertices[3].TextureCoordinate = new Vector2(3, 3);
 
+
         this.quadIndices = new short[] { 0, 1, 2, 1, 2, 3 };
         this.quadTransform = Matrix.CreateScale(scale);
+    }
+
+    private VertexPositionNormalTexture[] setUpBoxes(Vector3 Translation, VertexPositionNormalTexture[] BoxVertices)
+    {
+        float scale = 5.0f;
+
+        float root2 = (float)Math.Sqrt(2);
+
+        BoxVertices = new VertexPositionNormalTexture[8];
+        // Ceiling
+        // TopLeft
+        BoxVertices[0].Position = new Vector3(-10, 100, -10) + Translation;
+        BoxVertices[0].Normal = new Vector3(-root2, root2, -root2);
+        // TopRight
+        BoxVertices[1].Position = new Vector3(10, 100, -10) + Translation;
+        BoxVertices[1].Normal = new Vector3(root2, root2, -root2);
+        // BottomLeft
+        BoxVertices[2].Position = new Vector3(-10, 100, 10) + Translation;
+        BoxVertices[2].Normal = new Vector3(-root2, root2, root2);
+        // BottomRight
+        BoxVertices[3].Position = new Vector3(10, 100, 10) + Translation;
+        BoxVertices[3].Normal = new Vector3(root2, root2, root2);
+
+        // Floor
+        // TopLeft
+        BoxVertices[4].Position = new Vector3(-10, -10, -10) + Translation;
+        BoxVertices[4].Normal = new Vector3(-root2, -root2, -root2);
+        // TopRight
+        BoxVertices[5].Position = new Vector3(10, -10, -10) + Translation;
+        BoxVertices[5].Normal = new Vector3(root2, -root2, -root2);
+        // BottomLeft
+        BoxVertices[6].Position = new Vector3(-10, -10, 10) + Translation;
+        BoxVertices[6].Normal = new Vector3(-root2, -root2, root2);
+        // BottomRight
+        BoxVertices[7].Position = new Vector3(10, -10, 10) + Translation;
+        BoxVertices[7].Normal = new Vector3(root2, -root2, root2);
+
+
+        this.boxIndices = new short[] { 0, 1, 2, 1, 2, 3,              // Top 
+                                        0, 4, 2, 4, 2, 6,              // Left
+                                        3, 1, 5, 5, 7, 3,              // Right
+                                        2, 3, 6, 3, 6, 7,              // Front
+                                        4, 5, 6, 5, 6, 7,              // Bottom
+                                        0, 1, 4, 1, 4, 5, };           // Back                                                          
+
+        this.boxTransform = Matrix.CreateScale(scale);
+        return BoxVertices;
     }
 
     protected void DrawScene(Matrix World)
@@ -255,6 +315,14 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         // Draw the Quad.
         this.GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, quadVertices,
             0, quadVertices.Length, quadIndices, 0, this.quadIndices.Length / 3);
+
+        // Draw the Box.
+        for (int i = 0; i < boxes.Count; i++)
+        {
+            this.GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, boxes[i],
+        0, boxes[i].Length, boxIndices, 0, this.boxIndices.Length / 3);
+        }
+
 
         // Draw the bunny.
         DrawModel(bunny, 10.0f, new Vector3(2, 10, 3));
