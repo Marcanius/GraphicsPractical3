@@ -34,10 +34,18 @@ partial class Game1
 
         currentTechnique = "GreyScale";
 
+        if (gaussian)
+            currentTechnique = "Gaussian";
+
         Vector3 tempSunScreen = Vector3.Transform(SunPosition, transform);
         this.SunScreenPos = new Vector2(tempSunScreen.X, tempSunScreen.Y);
 
         FillPostParameters(postProcessing);
+
+        if (gaussian)
+        {
+            DrawGaussianBlur(postRenderTarget);
+        }
 
         spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque,
             SamplerState.LinearClamp, DepthStencilState.Default,
@@ -120,5 +128,48 @@ partial class Game1
 
         // Drop the render target
         GraphicsDevice.SetRenderTarget(null);
+    }
+
+    protected void DrawGaussianBlur(RenderTarget2D renderTarget)
+    {
+        GraphicsDevice.SetRenderTarget(postRenderTarget2);
+        Texture2D screen = (Texture2D)postRenderTarget;
+
+        Color[] color = new Color[1];
+        screen.GetData<Color>(0, new Rectangle(400, 300, 1, 1), color, 0, 1);
+        Console.WriteLine("1: " + color[0]);
+
+        EffectTechnique previous = postProcessing.CurrentTechnique;
+        postProcessing.CurrentTechnique = postProcessing.Techniques["Gaussian"];
+        postProcessing.Parameters["screenGrab"].SetValue(screen);
+        postProcessing.Parameters["offset"].SetValue(offsetHor);
+
+        spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postProcessing);
+
+        spriteBatch.Draw(screen, new Rectangle(0, 0, 800, 600), Color.White);
+        spriteBatch.End();
+
+        GraphicsDevice.SetRenderTarget(postRenderTarget3);
+        screen = (Texture2D)postRenderTarget;
+
+        color = new Color[2];
+        screen.GetData<Color>(0, new Rectangle(400, 300, 1, 1), color, 0, 1);
+        Console.WriteLine("1: " + color[0]);
+
+        postProcessing.Parameters["screenGrab"].SetValue(screen);
+        postProcessing.Parameters["offset"].SetValue(offsetVer);
+
+        color = new Color[2];
+        screen.GetData<Color>(0, new Rectangle(400, 300, 1, 1), color, 0, 1);
+        Console.WriteLine("1: " + color[0]);
+
+        spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postProcessing);
+
+        spriteBatch.Draw(screen, new Rectangle(0, 0, 800, 600), Color.White);
+        spriteBatch.End();
+
+        GraphicsDevice.SetRenderTarget(null);
+
+        postProcessing.CurrentTechnique = previous;
     }
 }

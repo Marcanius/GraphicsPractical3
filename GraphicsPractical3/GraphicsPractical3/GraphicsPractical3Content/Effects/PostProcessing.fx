@@ -1,6 +1,7 @@
 // --------------------------------------- Defines --------------------------------------- \\
 
 #define NUM_SAMPLES 100
+#define initialSize 15
 
 // --------------------------------------- Top Level Variables --------------------------------------- \\
 
@@ -11,7 +12,11 @@ float gamma;
 float4x4 MatrixTransform;
 
 // Booleans for the different post processes.
-bool grayScale, godRays;
+bool grayScale, godRays, gaussian;
+
+// Array info needed for GaussianBlur
+float2 offset[initialSize];
+float weight[initialSize];
 
 // God Rays
 // The sun.
@@ -27,6 +32,9 @@ Texture2D screenGrab;
 sampler TextureSampler = sampler_state
 {
 	Texture = < screenGrab >;
+	MipFilter = Linear;
+	MinFilter = Linear;
+	MagFilter = Linear;
 };
 
 //--------------------------------------- The Vertex Shader---------------------------------------\\
@@ -57,14 +65,18 @@ float4 GammaCorrection(float2 TexCoord : TEXCOORD0) : COLOR0
 	return output;
 }
 
-float4 GaussianBlurV(float2 TexCoord : TEXCOORD0) : COLOR0
+float4 GaussianBlur(float2 TexCoord : TEXCOORD0) : COLOR0
 {
-	return float4(0.5f, 0.5f, 0.5f, 1);
-}
+	float3 result = (float3)0.0f;
 
-float4 GaussianBlurH(float2 TexCoord : TEXCOORD0) : COLOR0
-{
-	return float4(0.5f, 0.5f, 0.5f, 1);
+	//if (!gaussian)
+	//	return tex2D(TextureSampler, TexCoord);
+
+	for (int i = 0; i < initialSize; i++)
+		//result += weight[i] * tex2D(TextureSampler, offset[i] + TexCoord);
+		result = (float4)0.75f;
+
+	return (result.rgb, 1.0f);
 }
 
 float4 GodRays(float2 TexCoord : TEXCOORD0) : COLOR0
@@ -155,12 +167,7 @@ technique Gaussian
 	pass Pass1
 	{
 		VertexShader = compile vs_3_0 SpriteVertexShader();
-		PixelShader = compile ps_3_0 GaussianBlurV();
-	}
-
-	pass Pass2
-	{
-		PixelShader = compile ps_3_0 GaussianBlurH();
+		PixelShader = compile ps_3_0 GaussianBlur();
 	}
 }
 

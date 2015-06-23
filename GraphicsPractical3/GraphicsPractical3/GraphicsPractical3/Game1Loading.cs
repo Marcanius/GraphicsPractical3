@@ -32,7 +32,11 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
 
     // Post-Processing.
     Effect postProcessing;
-    RenderTarget2D postRenderTarget;
+    RenderTarget2D postRenderTarget, postRenderTarget2, postRenderTarget3;
+    Vector2[] offsetHor, offsetVer;
+    float[] weights;
+    float amount = 2.0f;
+    int radius = 7;
 
     public Game1()
     {
@@ -73,6 +77,22 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
             false,
             GraphicsDevice.PresentationParameters.BackBufferFormat,
             DepthFormat.Depth24);
+
+        postRenderTarget2 = new RenderTarget2D(
+            GraphicsDevice,
+            GraphicsDevice.PresentationParameters.BackBufferWidth,
+            GraphicsDevice.PresentationParameters.BackBufferHeight,
+            false,
+            GraphicsDevice.PresentationParameters.BackBufferFormat,
+            DepthFormat.None);
+
+        postRenderTarget3 = new RenderTarget2D(
+            GraphicsDevice,
+            GraphicsDevice.PresentationParameters.BackBufferWidth,
+            GraphicsDevice.PresentationParameters.BackBufferHeight,
+            false,
+            GraphicsDevice.PresentationParameters.BackBufferFormat,
+            DepthFormat.None);
 
         base.Initialize();
     }
@@ -137,7 +157,12 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         }
 
         // Load the PostProcesssing effect, and fill its parameters.
+        CalculateWeights();
+        CalculateOffset(400, 300);
+
         postProcessing = this.Content.Load<Effect>("Effects/PostProcessing");
+        postProcessing.Parameters["weight"].SetValue(weights);
+        postProcessing.Parameters["offset"].SetValue(offsetHor);
 
         currentTechnique = "GreyScale";
         FillPostParameters(postProcessing);
@@ -223,5 +248,46 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         
         // Return the finished box.
         return boxVertices;
+    }
+
+    protected void CalculateOffset(int width, int height)
+    {
+        offsetHor = new Vector2[1 + (2 * radius)];
+        offsetVer = new Vector2[1 + (2 * radius)];
+
+        float horOffset = 1.0f / width;
+        float verOffset = 1.0f / height;
+
+        int position = 0;
+
+        for (int i = radius; i >= -radius; i--)
+        {
+            position = radius + i;
+            offsetHor[position] = new Vector2(horOffset * i, 0.0f);
+            offsetVer[position] = new Vector2(0.0f, verOffset * i);
+        }
+    }
+
+    protected void CalculateWeights()
+    {
+        weights = new float[1 + (radius * 2)];
+        float sigma = radius / amount;
+
+        float SquareSigmaTwo = sigma * sigma * 2.0f;
+        float RootSigma = (float)Math.Sqrt(Math.PI * SquareSigmaTwo);
+        float result = 0.0f;
+        float distance;
+        int position;
+
+        for (int i = radius; i >= -radius; i--)
+        {
+            position = i + radius;
+            distance = i * i;
+            weights[position] = (float)Math.Exp(-distance / SquareSigmaTwo) / RootSigma;
+            result += weights[position];
+        }
+
+        for (int i = 0; i < weights.Length; i++)
+            weights[i] = weights[i] / result;
     }
 }

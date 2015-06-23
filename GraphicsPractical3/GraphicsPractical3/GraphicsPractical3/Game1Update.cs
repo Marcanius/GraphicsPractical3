@@ -28,17 +28,8 @@ partial class Game1
             {
                 lights[i].Update(gameTime);
 
-                LightPositions[0] = lights[0].Position;
-                LightPositions[1] = lights[1].Position;
-                LightPositions[2] = lights[2].Position;
-                LightPositions[3] = lights[3].Position;
-                LightPositions[4] = lights[4].Position;
-
-                LightColors[0] = lights[0].Color;
-                LightColors[1] = lights[1].Color;
-                LightColors[2] = lights[2].Color;
-                LightColors[3] = lights[3].Color;
-                LightColors[4] = lights[4].Color;
+                LightPositions[i] = lights[i].Position;
+                LightColors[i] = lights[i].Color;
 
                 //LightPositions[0] = camera.Eye;
             }

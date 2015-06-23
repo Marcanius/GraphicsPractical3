@@ -23,7 +23,7 @@ public class MovingLight
 
     public void Update(GameTime gT)
     {
-        angle = (float)gT.TotalGameTime.Milliseconds / 1000;
+        angle += (float)gT.ElapsedGameTime.Milliseconds / 1000;
         this.Position = Origin + new Vector3((float)Math.Cos((angle + Offset) * 2 * MathHelper.Pi), 0, (float)Math.Sin((angle + Offset) * 2 * MathHelper.Pi)) * Radius;
     }
 }
