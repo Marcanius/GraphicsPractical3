@@ -61,6 +61,28 @@ partial class Game1
             gaussian = !gaussian;
 
         // Gaussian Radius.
+        if (Hold(Keys.Y) && Click(Keys.Up))
+        {
+            radius = (int)MathHelper.Clamp(radius + 2, 1, 11);
+            CalculateOffsetAndWeight(400, 300);
+        }
+        if (Hold(Keys.Y) && Click(Keys.Down))
+        {
+            radius = (int)MathHelper.Clamp(radius - 2, 1, 11);
+            CalculateOffsetAndWeight(400, 300);
+        }
+
+        // Gaussian Amount.
+        if (Hold(Keys.H) && Click(Keys.Up))
+        {
+            amount = MathHelper.Clamp(amount + 0.2f, 0.2f, 5f);
+            CalculateOffsetAndWeight(400, 300);
+        }
+        if (Hold(Keys.H) && Click(Keys.Down))
+        {
+            amount = MathHelper.Clamp(amount - 0.2f, 0.2f, 5f);
+            CalculateOffsetAndWeight(400, 300);
+        }
 
         // Bloom.
         if (Click(Keys.I))
@@ -74,12 +96,26 @@ partial class Game1
         if (Click(Keys.O))
             HDR = !HDR;
 
+        hudMessage = "Camera Position: " + camera.Eye +
+                     "\nCamera Focus: " + camera.Focus;
+
+        if (gaussian)
+            hudMessage += "\nRadius: " + radius +
+                          "\nAmount: " + amount;
+
         base.Update(gameTime);
     }
 
     private bool Click(Keys KeyToCheck)
     {
         if (curr.IsKeyDown(KeyToCheck) && prev.IsKeyUp(KeyToCheck))
+            return true;
+        return false;
+    }
+
+    public bool Hold(Keys KeyToCheck)
+    {
+        if (curr.IsKeyDown(KeyToCheck))
             return true;
         return false;
     }

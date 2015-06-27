@@ -61,5 +61,10 @@ public partial class Game1 : Game
         effect.Parameters["Weight"].SetValue(5f);
         effect.Parameters["Exposure"].SetValue(.01f);
         effect.Parameters["Decay"].SetValue(0.9f);
+
+        // Gaussian
+        effect.Parameters["weight"].SetValue(weights);
+        effect.Parameters["offsetHor"].SetValue(offsetHor);
+        effect.Parameters["offsetVer"].SetValue(offsetVer);
     }
 }

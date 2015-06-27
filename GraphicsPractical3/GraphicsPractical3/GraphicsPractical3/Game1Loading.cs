@@ -11,6 +11,7 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
     FrameRateCounter frameRateCounter;
     Camera camera;
     SpriteFont spriteFont;
+    string hudMessage;
 
     // The scene.
     Model bunny;
@@ -157,12 +158,9 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         }
 
         // Load the PostProcesssing effect, and fill its parameters.
-        CalculateWeights();
-        CalculateOffset(400, 300);
+        CalculateOffsetAndWeight(400, 300);
 
         postProcessing = this.Content.Load<Effect>("Effects/PostProcessing");
-        postProcessing.Parameters["weight"].SetValue(weights);
-        postProcessing.Parameters["offset"].SetValue(offsetHor);
 
         currentTechnique = "GreyScale";
         FillPostParameters(postProcessing);
@@ -245,13 +243,14 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
             0, 2, 4, 2, 4, 6,   // Left
             1, 3, 5, 3, 5, 7,   // Right
         };
-        
+
         // Return the finished box.
         return boxVertices;
     }
 
-    protected void CalculateOffset(int width, int height)
+    protected void CalculateOffsetAndWeight(int width, int height)
     {
+        // Offsets
         offsetHor = new Vector2[1 + (2 * radius)];
         offsetVer = new Vector2[1 + (2 * radius)];
 
@@ -266,10 +265,8 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
             offsetHor[position] = new Vector2(horOffset * i, 0.0f);
             offsetVer[position] = new Vector2(0.0f, verOffset * i);
         }
-    }
 
-    protected void CalculateWeights()
-    {
+        // Weight
         weights = new float[1 + (radius * 2)];
         float sigma = radius / amount;
 
@@ -277,14 +274,14 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         float RootSigma = (float)Math.Sqrt(Math.PI * SquareSigmaTwo);
         float result = 0.0f;
         float distance;
-        int position;
+        int index;
 
         for (int i = radius; i >= -radius; i--)
         {
-            position = i + radius;
+            index = i + radius;
             distance = i * i;
-            weights[position] = (float)Math.Exp(-distance / SquareSigmaTwo) / RootSigma;
-            result += weights[position];
+            weights[index] = (float)Math.Exp(-distance / SquareSigmaTwo) / RootSigma;
+            result += weights[index];
         }
 
         for (int i = 0; i < weights.Length; i++)

@@ -15,7 +15,8 @@ float4x4 MatrixTransform;
 bool grayScale, godRays, gaussian;
 
 // Array info needed for GaussianBlur
-float2 offset[initialSize];
+float2 offsetHor[initialSize];
+float2 offsetVer[initialSize];
 float weight[initialSize];
 
 // God Rays
@@ -65,18 +66,30 @@ float4 GammaCorrection(float2 TexCoord : TEXCOORD0) : COLOR0
 	return output;
 }
 
-float4 GaussianBlur(float2 TexCoord : TEXCOORD0) : COLOR0
+float4 GaussianBlurHorizontal(float2 TexCoord : TEXCOORD0) : COLOR0
 {
-	float3 result = (float3)0.0f;
+	float4 result = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	//if (!gaussian)
 	//	return tex2D(TextureSampler, TexCoord);
 
 	for (int i = 0; i < initialSize; i++)
-		//result += weight[i] * tex2D(TextureSampler, offset[i] + TexCoord);
-		result = (float4)0.75f;
+		result += tex2D(TextureSampler, offsetHor[i] + TexCoord) * weight[i];
 
-	return (result.rgb, 1.0f);
+	return result;
+}
+
+float4 GaussianBlurVertical(float2 TexCoord : TEXCOORD0) : COLOR0
+{
+	float4 result = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+	//if (!gaussian)
+	//	return tex2D(TextureSampler, TexCoord);
+
+	for (int i = 0; i < initialSize; i++)
+		result += tex2D(TextureSampler, offsetVer[i] + TexCoord) * weight[i];
+
+	return result;
 }
 
 float4 GodRays(float2 TexCoord : TEXCOORD0) : COLOR0
@@ -162,12 +175,19 @@ technique VolumetricLighting
 	}
 }
 
-technique Gaussian
+technique GaussianH
 {
-	pass Pass1
+	pass Horizontal
 	{
-		VertexShader = compile vs_3_0 SpriteVertexShader();
-		PixelShader = compile ps_3_0 GaussianBlur();
+		PixelShader = compile ps_2_0 GaussianBlurVertical();
+	}
+}
+
+technique GaussianV
+{
+	pass Vertical
+	{
+		PixelShader = compile ps_2_0 GaussianBlurHorizontal();
 	}
 }
 
