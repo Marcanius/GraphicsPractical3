@@ -63,12 +63,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Models\MJPTrianglesBot.txt">
-      <Name>MJPTrianglesBot</Name>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Models\MJPTrianglesTop.txt">
       <Name>MJPTrianglesTop</Name>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Models\MJPIndices.txt">
+      <Name>MJPIndices</Name>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

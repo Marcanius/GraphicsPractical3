@@ -12,11 +12,12 @@ partial class Game1
 
     protected override void Update(GameTime gameTime)
     {
+        // Gets the keyboard states.
         prev = curr;
         curr = Keyboard.GetState();
 
         // Allows the game to exit.
-        if (curr.IsKeyDown(Keys.Escape))
+        if (Hold(Keys.Escape))
             this.Exit();
 
         // Update the position of the camera.
@@ -30,82 +31,92 @@ partial class Game1
 
                 LightPositions[i] = lights[i].Position;
                 LightColors[i] = lights[i].Color;
-
-                //LightPositions[0] = camera.Eye;
             }
 
         // Update the window title.
         this.Window.Title = "XNA Renderer | FPS: " + this.frameRateCounter.FrameRate;
 
-        // Change parameters based on input
-        // Lighting
+        // Change parameters based on input.
         // Whether lights move.
         if (Click(Keys.R))
             updateLights = !updateLights;
-
-        // Whether lights get drawn.
-        if (Click(Keys.F))
-            drawLights = !drawLights;
-
+        
         // Cell shading.
         if (Click(Keys.T))
             cellShading = !cellShading;
 
-        // Postprocessing
         // GreyScaling.
         if (Click(Keys.U))
             greyScale = !greyScale;
 
-        // Gaussian Blurring.
+        #region Gaussian Blurring
+
+        // Whether we blur at all.
         if (Click(Keys.J))
             gaussian = !gaussian;
 
-        // Gaussian Radius.
-        if (Hold(Keys.Y) && Click(Keys.Up))
+        // he Radius.
+        if (Hold(Keys.Y) && Click(Keys.NumPad8))
         {
             radius = (int)MathHelper.Clamp(radius + 2, 1, 11);
             CalculateOffsetAndWeight(400, 300);
         }
-        if (Hold(Keys.Y) && Click(Keys.Down))
+        if (Hold(Keys.Y) && Click(Keys.NumPad2))
         {
             radius = (int)MathHelper.Clamp(radius - 2, 1, 11);
             CalculateOffsetAndWeight(400, 300);
         }
 
-        // Gaussian Amount.
-        if (Hold(Keys.H) && Click(Keys.Up))
+        // The Amount.
+        if (Hold(Keys.H) && Click(Keys.NumPad8))
         {
             amount = MathHelper.Clamp(amount + 0.2f, 0.2f, 5f);
             CalculateOffsetAndWeight(400, 300);
         }
-        if (Hold(Keys.H) && Click(Keys.Down))
+        if (Hold(Keys.H) && Click(Keys.NumPad2))
         {
             amount = MathHelper.Clamp(amount - 0.2f, 0.2f, 5f);
             CalculateOffsetAndWeight(400, 300);
         }
 
+        #endregion
+
         // Bloom.
         if (Click(Keys.I))
             bloom = !bloom;
 
-        // God Rays.
-        if (Click(Keys.K))
-            godRays = !godRays;
+        #region HUD
 
-        // HDR.
-        if (Click(Keys.O))
-            HDR = !HDR;
+        hudMessage = "Hold [LCTRL] for Controls";
+            //+ "\nCamera Position: " + camera.Eye
+            //+ "\nCamera Focus: " + camera.Focus;
 
-        hudMessage = "Camera Position: " + camera.Eye +
-                     "\nCamera Focus: " + camera.Focus;
+        // Displays our super intuitive control scheme.
+        if (Hold(Keys.LeftControl))
+        {
+            hudMessage = "\nCamera Controls: [WASD] for movement along the XZ-Plane\n[LSHIFT + SPACE] for movement along the Y-axis";
+            hudMessage += "\nPress [R] to toggle the movement of the lights";
+            hudMessage += "\nPress [T] to toggle Cell Shading";
+            hudMessage += "\nPress [U] to toggle Color Filtering";
+            hudMessage += "\nPress [J] to toggle Gaussian Blurring";
+            hudMessage += "\nPress [I] to toggle Bloom";
+        }
 
+        // Displays some helpful information in case of bloom, namely, that this is a case of bloom.
+        if (bloom)
+            hudMessage += "\nBloom: On";
+
+        // Displays some helpful information in case of gaussian blurring
         if (gaussian)
-            hudMessage += "\nRadius: " + radius +
-                          "\nAmount: " + amount;
+            hudMessage += "\n-------------------------------------\nRadius: " + radius + "\n    Hold [Y] and press [NUM8] or [NUM2] to change the Radius"
+                + "\nAmount: " + amount + "\n    Hold [H] and press [NUM8] or [NUM2] to change the Amount";
+
+        #endregion
 
         base.Update(gameTime);
     }
 
+    // Returns whether a key is pressed down this update, but not the previous update.
     private bool Click(Keys KeyToCheck)
     {
         if (curr.IsKeyDown(KeyToCheck) && prev.IsKeyUp(KeyToCheck))
@@ -113,6 +124,7 @@ partial class Game1
         return false;
     }
 
+    // Returns whether a key is being held down this update.
     public bool Hold(Keys KeyToCheck)
     {
         if (curr.IsKeyDown(KeyToCheck))

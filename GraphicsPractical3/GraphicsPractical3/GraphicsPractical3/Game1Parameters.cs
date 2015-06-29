@@ -20,10 +20,9 @@ public partial class Game1 : Game
 
     // PostProcessing Parameters.
     string currentTechnique = "ColorFilter";
-    bool greyScale, gaussian, bloom, godRays, HDR;
-    float gamma = 1.0f;
-    Vector3 SunPosition = new Vector3(0, 0, 0);
-    Vector2 SunScreenPos;
+    bool greyScale, gaussian, bloom;
+    float gamma = 1.0f, 
+        brightnessThreshold = 0.9f;
 
     private void FillLightingParameters(Effect effect)
     {
@@ -55,16 +54,7 @@ public partial class Game1 : Game
         // Gamma Correction.
         effect.Parameters["gamma"].SetValue(this.gamma);
         
-        // GodRays
-        effect.Parameters["SunScreenPos"].SetValue(this.SunScreenPos);
-        effect.Parameters["Density"].SetValue(0.8f);
-        effect.Parameters["Weight"].SetValue(5f);
-        effect.Parameters["Exposure"].SetValue(.01f);
-        effect.Parameters["Decay"].SetValue(0.9f);
-
-        // Gaussian
-        effect.Parameters["weight"].SetValue(weights);
-        effect.Parameters["offsetHor"].SetValue(offsetHor);
-        effect.Parameters["offsetVer"].SetValue(offsetVer);
+        // Bloom
+        
     }
 }
