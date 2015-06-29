@@ -53,9 +53,12 @@ partial class Game1
 
         // Whether we blur at all.
         if (Click(Keys.J))
+        {
             gaussian = !gaussian;
+            CalculateOffsetAndWeight(400, 300);
+        }
 
-        // he Radius.
+        // The Radius.
         if (Hold(Keys.Y) && Click(Keys.NumPad8))
         {
             radius = (int)MathHelper.Clamp(radius + 2, 1, 11);

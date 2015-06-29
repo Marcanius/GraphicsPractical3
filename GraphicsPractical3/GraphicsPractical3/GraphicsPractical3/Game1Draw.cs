@@ -112,7 +112,6 @@ partial class Game1
 
         World = quadTransform * Matrix.CreateTranslation(new Vector3(0, 10, 0));
         FillLightingParameters(lighting);
-        camera.SetEffectParameters(lighting);
 
         foreach (EffectPass pass in lighting.CurrentTechnique.Passes)
             pass.Apply();
@@ -159,21 +158,20 @@ partial class Game1
 
         // Get the intermediate result, and render to the result Render Target.
         GraphicsDevice.SetRenderTarget(gaussianRender2);
-        Texture2D intermediate = (Texture2D)gaussianRender;
         GraphicsDevice.Clear(Color.Black);
 
         // Set the post effect parameters.
         postProcessing.CurrentTechnique = postProcessing.Techniques["GaussianV"];
-        postProcessing.Parameters["screenGrab"].SetValue(intermediate);
+        postProcessing.Parameters["screenGrab"].SetValue(gaussianRender);
 
         // Draw the render, with the vertical blur pass applied.
         spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postProcessing);
-        spriteBatch.Draw(intermediate, new Rectangle(0, 0, 800, 600), Color.White);
+        spriteBatch.Draw(gaussianRender, new Rectangle(0, 0, 800, 600), Color.White);
         spriteBatch.End();
 
         // Return the end result.
         GraphicsDevice.SetRenderTarget(null);
-        return (Texture2D)gaussianRender2;
+        return gaussianRender2;
     }
 
     // Draw the rendered scene, with bloom applied.
@@ -192,20 +190,37 @@ partial class Game1
         spriteBatch.Draw(inputTexture, new Rectangle(0, 0, bloomRenderBright.Width, bloomRenderBright.Height), Color.White);
         spriteBatch.End();
 
-        // Scale the texture to 1/2, 1/4 and 1/8 size.
+        // Render the bright pass, scaled to different amounts, and blurred using gaussian blur.
         // Render the texture again, to a new target, and with a smaller scale.
-        radius = 5;
-        amount = 5;
-
+        int prevRadius = this.radius;
+        float prevAmount = this.amount;
+        this.radius = 1;
+        this.amount = 1;
 
         helpDraw(bloomRenderBlurH, bloomRenderBlurHV, bloomRenderBright);
         helpDraw(bloomRender2BlurH, bloomRender2BlurHV, bloomRenderBright);
         helpDraw(bloomRender4BlurH, bloomRender4BlurHV, bloomRenderBright);
         helpDraw(bloomRender8BlurH, bloomRender8BlurHV, bloomRenderBright);
+        
+        // Render the final result, sampling all the smaller blurred images.
+        GraphicsDevice.SetRenderTarget(bloomRenderFinish);
+        GraphicsDevice.Clear(Color.Black);
 
-        // Resize the downscaled texture to the original size.
+        postProcessing.CurrentTechnique = postProcessing.Techniques["FinalBloom"];
+        postProcessing.Parameters["screenGrab"].SetValue(inputTexture);
+        postProcessing.Parameters["bloomMelt1"].SetValue(bloomRenderBlurHV);
+        postProcessing.Parameters["bloomMelt2"].SetValue(bloomRender2BlurHV);
+        postProcessing.Parameters["bloomMelt3"].SetValue(bloomRender4BlurHV);
+        postProcessing.Parameters["bloomMelt4"].SetValue(bloomRender8BlurHV);
 
-        // Paste all the textures together.
+        postProcessing.CurrentTechnique.Passes["Pass1"].Apply();
+
+        spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postProcessing);
+        spriteBatch.Draw(inputTexture, new Rectangle(0, 0, bloomRenderBright.Width, bloomRenderBright.Height), Color.White);
+        spriteBatch.End();
+
+        this.radius = prevRadius;
+        this.amount = prevAmount;
 
         // Return the end result.
         GraphicsDevice.SetRenderTarget(null);
@@ -217,14 +232,18 @@ partial class Game1
         GraphicsDevice.SetRenderTarget(rH);
         GraphicsDevice.Clear(Color.Black);
 
+        // Set the parameters for blurring the different renders.
         postProcessing.CurrentTechnique = postProcessing.Techniques["GaussianH"];
         postProcessing.Parameters["screenGrab"].SetValue(r1);
+
         CalculateOffsetAndWeight(rH.Width / 2, rV.Height / 2);
         postProcessing.Parameters["weight"].SetValue(weights);
         postProcessing.Parameters["offsetHor"].SetValue(offsetHor);
         postProcessing.Parameters["offsetVer"].SetValue(offsetVer);
+
         postProcessing.CurrentTechnique.Passes["Pass1"].Apply();
 
+        // Draw first image, scaled down, and blurred.
         spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postProcessing);
         spriteBatch.Draw(bloomRenderBright, new Rectangle(0, 0, rH.Width, rH.Height), Color.White);
         spriteBatch.End();

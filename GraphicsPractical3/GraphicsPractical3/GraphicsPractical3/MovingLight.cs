@@ -10,7 +10,7 @@ public class MovingLight
     public Vector3 Origin, Position;
     public float Radius, Offset, Speed;
     public Vector4 Color;
-    double angle;
+    private double angle;
 
     public MovingLight(Vector3 Origin, float Radius, float Offset, float Speed, Vector4 Color)
     {
@@ -25,6 +25,9 @@ public class MovingLight
     public void Update(GameTime gT)
     {
         angle += Speed * (float)gT.ElapsedGameTime.TotalMilliseconds / 1000;
-        this.Position = Origin + new Vector3((float)Math.Cos((angle + Offset) * 2 * MathHelper.Pi), (float)Math.Cos(angle * 5 + Offset), (float)Math.Sin((angle + Offset) * 2 * MathHelper.Pi)) * Radius;
+        this.Position = Origin + new Vector3(
+            (float)Math.Cos((angle + Offset) * 2 * MathHelper.Pi), 
+            (float)Math.Cos(angle * 5 + Offset), 
+            (float)Math.Sin((angle + Offset) * 2 * MathHelper.Pi)) * Radius;
     }
 }

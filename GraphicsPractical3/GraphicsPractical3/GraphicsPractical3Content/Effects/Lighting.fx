@@ -47,9 +47,10 @@ struct VertexShaderOutput
 
 float4 DiffuseShading(float3 Position, float3 Normal, float3 LightPosition, float4 LightColor)
 {
+	float distance = length(LightPosition - Position);
 	float LdotNN = dot(normalize(LightPosition - Position), Normal);
 
-	return LightColor * (DiffuseIntensity * max(0.0f, LdotNN));
+	return LightColor * (DiffuseIntensity * max(0.0f, LdotNN)) * (1/pow(distance,2));
 }
 
 // --------------------------------------- The Vertex Shader --------------------------------------- \\

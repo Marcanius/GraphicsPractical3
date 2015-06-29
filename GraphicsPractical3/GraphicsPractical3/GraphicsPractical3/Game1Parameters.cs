@@ -19,42 +19,35 @@ public partial class Game1 : Game
     bool cellShading;
 
     // PostProcessing Parameters.
-    string currentTechnique = "ColorFilter";
     bool greyScale, gaussian, bloom;
-    float gamma = 1.0f, 
-        brightnessThreshold = 0.9f;
+    float brightnessThreshold = 0.3f;
 
     private void FillLightingParameters(Effect effect)
     {
-        // View, Projection
+        // View, Projection.
         this.camera.SetEffectParameters(effect);
+
         // World
         effect.Parameters["World"].SetValue(World);
-        // WorldIT
         effect.Parameters["WorldIT"].SetValue(Matrix.Transpose(Matrix.Invert(World)));
+
         // The arrays of lights.
         effect.Parameters["LightPositions"].SetValue(LightPositions);
         effect.Parameters["LightColors"].SetValue(LightColors);
+
+        // Ambient Lighting.
         effect.Parameters["AmbientColor"].SetValue(Color.DarkBlue.ToVector4());
         effect.Parameters["AmbientIntensity"].SetValue(0.2f);
+
+        // Diffuse Lighting.
         effect.Parameters["DiffuseIntensity"].SetValue(1.0f);
+
+        // Specular lighting.
         effect.Parameters["SpecularColor"].SetValue(Color.White.ToVector4());
         effect.Parameters["SpecularIntensity"].SetValue(2.0f);
         effect.Parameters["SpecularPower"].SetValue(25.0f);
 
         // Whether we use cell shading.
         effect.Parameters["cellShading"].SetValue(cellShading);
-    }
-
-    private void FillPostParameters(Effect effect)
-    {
-        // Current Technique
-        effect.CurrentTechnique = effect.Techniques[currentTechnique];
-
-        // Gamma Correction.
-        effect.Parameters["gamma"].SetValue(this.gamma);
-        
-        // Bloom
-        
     }
 }

@@ -39,6 +39,7 @@ class Camera
     }
 
     #region Movement
+
     public void Update(GameTime gT)
     {
         // The time since the last update.
@@ -104,6 +105,7 @@ class Camera
 
         Focus = Eye + relativeFocus;
     }
+
     #endregion
 
     /// <summary>

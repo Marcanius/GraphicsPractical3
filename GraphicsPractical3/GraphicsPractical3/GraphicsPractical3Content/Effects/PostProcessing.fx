@@ -19,7 +19,11 @@ float weight[initialSize];
 float brightnessThreshold;
 
 // Texture deets
-Texture2D screenGrab;
+Texture2D screenGrab,
+	bloomMelt1,
+	bloomMelt2,
+	bloomMelt3,
+	bloomMelt4;
 
 sampler TextureSampler = sampler_state
 {
@@ -29,6 +33,46 @@ sampler TextureSampler = sampler_state
 	MagFilter = Linear;
 	AddressU = Mirror;
 	AddressV = Mirror;
+};
+
+sampler BloomSampler = sampler_state
+{
+	Texture = < bloomMelt1 >;
+	MipFilter = Linear;
+	MinFilter = Linear;
+	MagFilter = Linear;/*
+	AddressU = Mirror;
+	AddressV = Mirror;*/
+};
+
+sampler HalfSampler = sampler_state
+{
+	Texture = < bloomMelt2 >;
+	MipFilter = Linear;
+	MinFilter = Linear;
+	MagFilter = Linear;/*
+	AddressU = Mirror;
+	AddressV = Mirror;*/
+};
+
+sampler QuarterSampler = sampler_state
+{
+	Texture = < bloomMelt3 >;
+	MipFilter = Linear;
+	MinFilter = Linear;
+	MagFilter = Linear;/*
+	AddressU = Mirror;
+	AddressV = Mirror;*/
+};
+
+sampler OctoSampler = sampler_state
+{
+	Texture = < bloomMelt4 >;
+	MipFilter = Linear;
+	MinFilter = Linear;
+	MagFilter = Linear;/*
+	AddressU = Mirror;
+	AddressV = Mirror;*/
 };
 
 //--------------------------------------- The Vertex Shader---------------------------------------\\
@@ -98,9 +142,33 @@ float4 BrightnessFilter(float2 TexCoord : TEXCOORD0) : COLOR0
 	return result;
 }
 
-float4 Bloom(float2 TexCoord : TEXCOORD0) : COLOR0
+float4 BloomMelt(float2 TexCoord : TEXCOORD0) : COLOR0
 {
+	// Sampling the input texture for the image without any bloom.
+	float4 result = tex2D(TextureSampler, TexCoord);
 
+	// Sampling the first scaled down, blurred image.
+	float4 firstBlur = tex2D(BloomSampler, TexCoord);
+	result.r = max(result.r, firstBlur.r);
+	result.g = max(result.g, firstBlur.g);
+	result.b = max(result.b, firstBlur.b);
+
+	float4 secondBlur = tex2D(HalfSampler, TexCoord);
+	result.r = max(result.r, secondBlur.r);
+	result.g = max(result.g, secondBlur.g);
+	result.b = max(result.b, secondBlur.b);
+
+	float4 thirdBlur = tex2D(QuarterSampler, TexCoord);
+	result.r = max(result.r, thirdBlur.r);
+	result.g = max(result.g, thirdBlur.g);
+	result.b = max(result.b, thirdBlur.b);
+
+	float4 fourthBlur = tex2D(OctoSampler, TexCoord);
+	result.r = max(result.r, fourthBlur.r);
+	result.g = max(result.g, fourthBlur.g);
+	result.b = max(result.b, fourthBlur.b);
+
+	return result;
 }
 
 technique BrightFilter
@@ -108,6 +176,14 @@ technique BrightFilter
 	pass Pass1
 	{
 		PixelShader = compile ps_2_0 BrightnessFilter();
+	}
+}
+
+technique FinalBloom
+{
+	pass Pass1
+	{
+		PixelShader = compile ps_2_0 BloomMelt();
 	}
 }
 
@@ -123,7 +199,7 @@ technique GaussianH
 {
 	pass Pass1
 	{
-		PixelShader = compile ps_2_0 GaussianBlurVertical();
+		PixelShader = compile ps_2_0 GaussianBlurHorizontal();
 	}
 }
 
@@ -131,7 +207,7 @@ technique GaussianV
 {
 	pass Pass1
 	{
-		PixelShader = compile ps_2_0 GaussianBlurHorizontal();
+		PixelShader = compile ps_2_0 GaussianBlurVertical();
 	}
 }
 

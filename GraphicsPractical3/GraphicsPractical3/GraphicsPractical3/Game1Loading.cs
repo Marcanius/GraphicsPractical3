@@ -43,10 +43,11 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         bloomRender4BlurH, bloomRender4BlurHV,
         bloomRender8BlurH, bloomRender8BlurHV,
         bloomRenderFinish;
+    // Gaussian Blurring
+    int radius = 5;
+    float amount = 5.0f;
     Vector2[] offsetHor, offsetVer;
     float[] weights;
-    float amount = 2.0f;
-    int radius = 7;
 
     public Game1()
     {
@@ -70,7 +71,7 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         // Flush the changes to the device parameters to the graphics card.
         this.graphics.ApplyChanges();
 
-        // Initialize the camera, located at (-100, 0, 0), and looking at the origin.
+        // Initialize the camera.
         this.camera = new Camera(new Vector3(0, 15, 15), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
 
         // Make the cursor visible on screen.
@@ -84,7 +85,7 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
             GraphicsDevice.PresentationParameters.BackBufferWidth,
             GraphicsDevice.PresentationParameters.BackBufferHeight,
             false,
-            GraphicsDevice.PresentationParameters.BackBufferFormat,
+            SurfaceFormat.Rgba64,
             DepthFormat.Depth24);
 
         gaussianRender = new RenderTarget2D(
@@ -92,93 +93,93 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
             GraphicsDevice.PresentationParameters.BackBufferWidth,
             GraphicsDevice.PresentationParameters.BackBufferHeight,
             false,
-            GraphicsDevice.PresentationParameters.BackBufferFormat,
+            SurfaceFormat.Rgba64,
             DepthFormat.Depth24);
 
         // The render targets for gaussian blur.
         gaussianRender2 = new RenderTarget2D(GraphicsDevice, 
             GraphicsDevice.PresentationParameters.BackBufferWidth,
-            GraphicsDevice.PresentationParameters.BackBufferHeight, 
-            false, 
-            GraphicsDevice.PresentationParameters.BackBufferFormat, 
+            GraphicsDevice.PresentationParameters.BackBufferHeight,
+            false,
+            SurfaceFormat.Rgba64,
             DepthFormat.Depth24);
 
         greyRender = new RenderTarget2D(GraphicsDevice, 
             GraphicsDevice.PresentationParameters.BackBufferWidth,
-            GraphicsDevice.PresentationParameters.BackBufferHeight, 
-            false, 
-            GraphicsDevice.PresentationParameters.BackBufferFormat, 
+            GraphicsDevice.PresentationParameters.BackBufferHeight,
+            false,
+            SurfaceFormat.Rgba64,
             DepthFormat.Depth24);
 
         // The render target for the brightness pass of bloom.
         bloomRenderBright = new RenderTarget2D(GraphicsDevice, 
             GraphicsDevice.PresentationParameters.BackBufferWidth,
-            GraphicsDevice.PresentationParameters.BackBufferHeight, 
-            false, 
-            GraphicsDevice.PresentationParameters.BackBufferFormat, 
+            GraphicsDevice.PresentationParameters.BackBufferHeight,
+            false,
+            SurfaceFormat.Rgba64,
             DepthFormat.Depth24);
 
         bloomRenderBlurH = new RenderTarget2D(GraphicsDevice,
             GraphicsDevice.PresentationParameters.BackBufferWidth,
             GraphicsDevice.PresentationParameters.BackBufferHeight,
             false,
-            GraphicsDevice.PresentationParameters.BackBufferFormat,
+            SurfaceFormat.Rgba64,
             DepthFormat.Depth24);
 
         bloomRenderBlurHV = new RenderTarget2D(GraphicsDevice,
             GraphicsDevice.PresentationParameters.BackBufferWidth,
             GraphicsDevice.PresentationParameters.BackBufferHeight,
             false,
-            GraphicsDevice.PresentationParameters.BackBufferFormat,
+            SurfaceFormat.Rgba64,
             DepthFormat.Depth24);
 
         bloomRender2BlurH = new RenderTarget2D(GraphicsDevice,
             GraphicsDevice.PresentationParameters.BackBufferWidth / 2,
             GraphicsDevice.PresentationParameters.BackBufferHeight / 2,
             false,
-            GraphicsDevice.PresentationParameters.BackBufferFormat,
+            SurfaceFormat.Rgba64,
             DepthFormat.Depth24);
 
         bloomRender2BlurHV = new RenderTarget2D(GraphicsDevice,
             GraphicsDevice.PresentationParameters.BackBufferWidth / 2,
             GraphicsDevice.PresentationParameters.BackBufferHeight / 2,
             false,
-            GraphicsDevice.PresentationParameters.BackBufferFormat,
+            SurfaceFormat.Rgba64,
             DepthFormat.Depth24);
 
         bloomRender4BlurH = new RenderTarget2D(GraphicsDevice,
             GraphicsDevice.PresentationParameters.BackBufferWidth / 4,
             GraphicsDevice.PresentationParameters.BackBufferHeight / 4,
             false,
-            GraphicsDevice.PresentationParameters.BackBufferFormat,
+            SurfaceFormat.Rgba64,
             DepthFormat.Depth24);
 
         bloomRender4BlurHV = new RenderTarget2D(GraphicsDevice,
             GraphicsDevice.PresentationParameters.BackBufferWidth / 4,
             GraphicsDevice.PresentationParameters.BackBufferHeight / 4,
             false,
-            GraphicsDevice.PresentationParameters.BackBufferFormat,
+            SurfaceFormat.Rgba64,
+            DepthFormat.Depth24);
+
+        bloomRender8BlurH = new RenderTarget2D(GraphicsDevice,
+            GraphicsDevice.PresentationParameters.BackBufferWidth / 8,
+            GraphicsDevice.PresentationParameters.BackBufferHeight / 8,
+            false,
+            SurfaceFormat.Rgba64,
             DepthFormat.Depth24);
 
         bloomRender8BlurHV = new RenderTarget2D(GraphicsDevice,
             GraphicsDevice.PresentationParameters.BackBufferWidth / 8,
             GraphicsDevice.PresentationParameters.BackBufferHeight / 8,
             false,
-            GraphicsDevice.PresentationParameters.BackBufferFormat,
-            DepthFormat.Depth24);
-
-        bloomRender8BlurHV = new RenderTarget2D(GraphicsDevice,
-            GraphicsDevice.PresentationParameters.BackBufferWidth / 8,
-            GraphicsDevice.PresentationParameters.BackBufferHeight / 8,
-            false,
-            GraphicsDevice.PresentationParameters.BackBufferFormat,
+            SurfaceFormat.Rgba64,
             DepthFormat.Depth24);
 
         bloomRenderFinish = new RenderTarget2D(GraphicsDevice,
             GraphicsDevice.PresentationParameters.BackBufferWidth,
             GraphicsDevice.PresentationParameters.BackBufferHeight,
             false,
-            GraphicsDevice.PresentationParameters.BackBufferFormat,
+            SurfaceFormat.Rgba64,
             DepthFormat.Depth24);
         #endregion
 
@@ -201,11 +202,11 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
 
         // Creating the moving lights.
         lights = new MovingLight[5];
-        lights[0] = new MovingLight(new Vector3(000, 13, 000), 2, 0, 1.0f, Color.IndianRed.ToVector4());
-        lights[1] = new MovingLight(new Vector3(000, 13, 000), -4, .25f, 1.1f, Color.LimeGreen.ToVector4());
-        lights[2] = new MovingLight(new Vector3(000, 13, 000), 6, .5f, 0.8f, Color.SkyBlue.ToVector4());
-        lights[3] = new MovingLight(new Vector3(-00, 13, 000), -8, .75f, 1.2f, Color.Fuchsia.ToVector4());
-        lights[4] = new MovingLight(new Vector3(000, 13, -00), 10, 1f, 1.25f, Color.Cyan.ToVector4());
+        lights[0] = new MovingLight(new Vector3(0, 13, 0), 2, 0, 0.2f, Color.IndianRed.ToVector4());
+        lights[1] = new MovingLight(new Vector3(0, 13, 0), -4, .25f, 0.1f, Color.LimeGreen.ToVector4());
+        lights[2] = new MovingLight(new Vector3(0, 13, 0), 6, .5f, 0.15f, Color.SkyBlue.ToVector4());
+        lights[3] = new MovingLight(new Vector3(0, 13, 0), -8, .75f, 0.3f, Color.Fuchsia.ToVector4());
+        lights[4] = new MovingLight(new Vector3(0, 13, 0), 10, 1f, 0.25f, Color.Cyan.ToVector4());
 
         // Create the sun for the god rays.
 
@@ -240,20 +241,14 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
 
         boxes = new List<VertexPositionNormalTexture[]>();
         for (int i = 0; i < 5; i++)
-        {
             boxes.Add(setUpBoxes(new Vector3(100 + 23 * i, 5 - 2.5f * i, -200 - 7 * i)));
-        }
 
         // Setup the MJP Logo
         mjp = new MJPLogo();
 
         // Load the PostProcesssing effect, and fill its parameters.
-        CalculateOffsetAndWeight(400, 300);
-
         postProcessing = this.Content.Load<Effect>("Effects/PostProcessing");
-
-        currentTechnique = "GreyScale";
-        FillPostParameters(postProcessing);
+        CalculateOffsetAndWeight(800, 300);
     }
 
     /// <summary>
@@ -283,7 +278,6 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         this.quadVertices[3].Position = new Vector3(10000, 0, 10000);
         this.quadVertices[3].Normal = quadNormal;
         this.quadVertices[3].TextureCoordinate = new Vector2(3, 3);
-
 
         this.quadIndices = new short[] { 0, 1, 2, 1, 2, 3 };
         this.quadTransform = Matrix.CreateScale(scale);
