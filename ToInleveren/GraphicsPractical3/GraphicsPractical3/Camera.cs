@@ -21,7 +21,7 @@ class Camera
     // Variables related to camera movement.
     float deltaAngleH, deltaAngleV;
     float angleH = (float)(-MathHelper.PiOver2), angleV = -0.3f;
-    float turnSpeed = 2, moveSpeed = 115;
+    float turnSpeed = 2, moveSpeed = 15;
 
 
     public Camera(Vector3 camEye, Vector3 camFocus, Vector3 camUp, float aspectRatio = 4.0f / 3.0f)
