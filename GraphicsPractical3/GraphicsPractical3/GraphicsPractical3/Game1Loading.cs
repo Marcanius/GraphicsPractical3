@@ -23,10 +23,10 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
     private short[] quadIndices;
     private Matrix quadTransform;
 
-    // The box
+    // The box.
     private List<VertexPositionNormalTexture[]> boxes;
     private short[] boxIndices;
-    //private Matrix boxTransform;
+    private List<Matrix> boxTransform;
 
     // Lighting
     Effect lighting;
@@ -43,7 +43,7 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         bloomRender4BlurH, bloomRender4BlurHV,
         bloomRender8BlurH, bloomRender8BlurHV,
         bloomRenderFinish;
-    // Gaussian Blurring
+    // Gaussian Blurring.
     int radius = 5;
     float amount = 5.0f;
     Vector2[] offsetHor, offsetVer;
@@ -202,13 +202,11 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
 
         // Creating the moving lights.
         lights = new MovingLight[5];
-        lights[0] = new MovingLight(new Vector3(0, 13, 0), 2, 0, 0.2f, Color.IndianRed.ToVector4());
+        lights[0] = new MovingLight(new Vector3(0, 100, 0), 0, 0, 0.0f, Color.LightGoldenrodYellow.ToVector4());// * 250);
         lights[1] = new MovingLight(new Vector3(0, 13, 0), -4, .25f, 0.1f, Color.LimeGreen.ToVector4());
         lights[2] = new MovingLight(new Vector3(0, 13, 0), 6, .5f, 0.15f, Color.SkyBlue.ToVector4());
         lights[3] = new MovingLight(new Vector3(0, 13, 0), -8, .75f, 0.3f, Color.Fuchsia.ToVector4());
         lights[4] = new MovingLight(new Vector3(0, 13, 0), 10, 1f, 0.25f, Color.Cyan.ToVector4());
-
-        // Create the sun for the god rays.
 
         // The positions of the multiple lights.
         LightPositions = new Vector3[5];
@@ -239,43 +237,47 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
 
         setupQuad();
 
+        // Make the list of boxes and transformations.
         boxes = new List<VertexPositionNormalTexture[]>();
+        boxTransform = new List<Matrix>();
         for (int i = 0; i < 5; i++)
-            boxes.Add(setUpBoxes(new Vector3(100 + 23 * i, 5 - 2.5f * i, -200 - 7 * i)));
+        {
+            boxes.Add(setUpBoxes());
+            boxTransform.Add(Matrix.CreateScale(2.0f) * Matrix.CreateTranslation(2 * i, 5 - 2.5f * i, - 2 * i));
+        }
 
         // Setup the MJP Logo
         mjp = new MJPLogo();
+        mjp.Transform = Matrix.CreateScale(40.0f, 1 / 40.0f, 40.0f) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(-600, 560, -1600);
 
         // Load the PostProcesssing effect, and fill its parameters.
         postProcessing = this.Content.Load<Effect>("Effects/PostProcessing");
         CalculateOffsetAndWeight(800, 300);
     }
 
-    /// <summary>
-    /// Sets up a 2 by 2 quad around the origin.
-    /// </summary>
+    // Sets up a 2 by 2 quad around the origin.
     private void setupQuad()
     {
-        float scale = 5.0f;
+        float scale = 10.0f;
 
         // Normal points up
         Vector3 quadNormal = new Vector3(0, 1, 0);
 
         this.quadVertices = new VertexPositionNormalTexture[4];
         // Top left
-        this.quadVertices[0].Position = new Vector3(-10000, 0, -10000);
+        this.quadVertices[0].Position = new Vector3(-1, 0, -1);
         this.quadVertices[0].Normal = quadNormal;
         this.quadVertices[0].TextureCoordinate = new Vector2(0, 0);
         // Top right
-        this.quadVertices[1].Position = new Vector3(10000, 0, -10000);
+        this.quadVertices[1].Position = new Vector3(1, 0, -1);
         this.quadVertices[1].Normal = quadNormal;
         this.quadVertices[1].TextureCoordinate = new Vector2(3, 0);
         // Bottom left
-        this.quadVertices[2].Position = new Vector3(-10000, 0, 10000);
+        this.quadVertices[2].Position = new Vector3(-1, 0, 1);
         this.quadVertices[2].Normal = quadNormal;
         this.quadVertices[2].TextureCoordinate = new Vector2(0, 3);
         // Bottom right
-        this.quadVertices[3].Position = new Vector3(10000, 0, 10000);
+        this.quadVertices[3].Position = new Vector3(1, 0, 1);
         this.quadVertices[3].Normal = quadNormal;
         this.quadVertices[3].TextureCoordinate = new Vector2(3, 3);
 
@@ -283,7 +285,7 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         this.quadTransform = Matrix.CreateScale(scale);
     }
 
-    private VertexPositionNormalTexture[] setUpBoxes(Vector3 Translation)
+    private VertexPositionNormalTexture[] setUpBoxes()
     {
         float root2 = (float)Math.Sqrt(2);
 
@@ -291,30 +293,30 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
 
         // Ceiling
         // TopLeft
-        boxVertices[0].Position = new Vector3(-10, 100, -10) + Translation;
+        boxVertices[0].Position = new Vector3(-1, 1, -1);
         boxVertices[0].Normal = new Vector3(-root2, root2, -root2);
         // TopRight
-        boxVertices[1].Position = new Vector3(10, 100, -10) + Translation;
+        boxVertices[1].Position = new Vector3(1, 1, -1);
         boxVertices[1].Normal = new Vector3(root2, root2, -root2);
         // BottomLeft
-        boxVertices[2].Position = new Vector3(-10, 100, 10) + Translation;
+        boxVertices[2].Position = new Vector3(-1, 1, 1);
         boxVertices[2].Normal = new Vector3(-root2, root2, root2);
         // BottomRight
-        boxVertices[3].Position = new Vector3(10, 100, 10) + Translation;
+        boxVertices[3].Position = new Vector3(1, 1, 1);
         boxVertices[3].Normal = new Vector3(root2, root2, root2);
 
         // Floor
         // TopLeft
-        boxVertices[4].Position = new Vector3(-10, -10, -10) + Translation;
+        boxVertices[4].Position = new Vector3(-1, -1, -1);
         boxVertices[4].Normal = new Vector3(-root2, -root2, -root2);
         // TopRight
-        boxVertices[5].Position = new Vector3(10, -10, -10) + Translation;
+        boxVertices[5].Position = new Vector3(1, -1, -1);
         boxVertices[5].Normal = new Vector3(root2, -root2, -root2);
         // BottomLeft
-        boxVertices[6].Position = new Vector3(-10, -10, 10) + Translation;
+        boxVertices[6].Position = new Vector3(-1, -1, 1);
         boxVertices[6].Normal = new Vector3(-root2, -root2, root2);
         // BottomRight
-        boxVertices[7].Position = new Vector3(10, -10, 10) + Translation;
+        boxVertices[7].Position = new Vector3(1, -1, 1);
         boxVertices[7].Normal = new Vector3(root2, -root2, root2);
 
 
@@ -353,13 +355,15 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         // Weight
         weights = new float[1 + (radius * 2)];
         float sigma = radius / amount;
-
+        
+        // Calculate the varaibles needed for the weight calculations.
         float SquareSigmaTwo = sigma * sigma * 2.0f;
         float RootSigma = (float)Math.Sqrt(Math.PI * SquareSigmaTwo);
         float result = 0.0f;
         float distance;
         int index;
 
+        // Calculate the weights for each spot in the array.
         for (int i = radius; i >= -radius; i--)
         {
             index = i + radius;
@@ -368,6 +372,7 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
             result += weights[index];
         }
 
+        // Divide all the weights by the total to get a weighted average.
         for (int i = 0; i < weights.Length; i++)
             weights[i] = weights[i] / result;
     }

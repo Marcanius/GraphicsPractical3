@@ -9,9 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 
-/// <summary>
-/// This is the main type for your game
-/// </summary>
+// This is the main type for your game
 public partial class Game1 : Microsoft.Xna.Framework.Game
 {
     GraphicsDeviceManager graphics;
@@ -41,7 +39,7 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
 
-        // Create and add a frame rate counter
+        // Create and add a frame rate counter.
         this.frameRateCounter = new FrameRateCounter(this);
         this.Components.Add(this.frameRateCounter);
     }
@@ -118,7 +116,7 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         head = this.Content.Load<Model>("Models/femalehead");
         head.Meshes[0].MeshParts[0].Effect = lighting;
 
-        // Caculate Gaussianblur parameters
+        // Caculate Gaussianblur parameters.
         CalculateOffset(postRenderTarget.Width / 2, postRenderTarget.Height / 2);
         CalculateWeights(radius, amount);
 
@@ -183,9 +181,6 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
         // Get a clear background.
         GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.DeepSkyBlue, 1.0f, 0);
 
-        // Draw the quad.
-
-
         // Draw the bunny.
         DrawModel(bunny, World);
 
@@ -208,63 +203,5 @@ public partial class Game1 : Microsoft.Xna.Framework.Game
 
         // Draw the model.
         mesh.Draw();
-    }
-
-    
-
-    protected void DrawToTexture(RenderTarget2D renderTarget, Matrix World)
-    {
-        // Set the render target.
-        GraphicsDevice.SetRenderTarget(renderTarget);
-
-        // Draw the scene
-        DrawScene(World);
-
-        // Drop the render target
-        GraphicsDevice.SetRenderTarget(null);
-    }
-
-    protected void CalculateOffset(int width, int height)
-    {
-        offsetHor = new Vector2[1 + (2 * radius)];
-        offsetVer = new Vector2[1 + (2 * radius)];
-
-        float horOffset = 1.0f / width;
-        float verOffset = 1.0f / height;
-
-        int position = 0;
-
-        for (int i = radius; i >= -radius; i--)
-        {
-            position = radius + i;
-            offsetHor[position] = new Vector2(horOffset * i, 0.0f);
-            offsetVer[position] = new Vector2(0.0f, verOffset * i);
-        }
-    }
-
-    protected void CalculateWeights(int Radius, float Amount)
-    {
-        radius = Radius;
-        amount = Amount;
-
-        weights = new float[1 + (radius * 2)];
-        float sigma = radius / amount;
-
-        float SquareSigmaTwo = sigma * sigma * 2.0f;
-        float RootSigma = (float)Math.Sqrt(Math.PI * SquareSigmaTwo);
-        float result = 0.0f;
-        float distance;
-        int position;
-
-        for (int i = radius; i >= -radius; i--)
-        {
-            position = i + radius;
-            distance = i * i;
-            weights[position] = (float)Math.Exp(-distance / SquareSigmaTwo) / RootSigma;
-            result += weights[position];
-        }
-
-        for (int i = 0; i < weights.Length; i++)
-            weights[i] = weights[i] / result;
     }
 }

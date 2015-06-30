@@ -12,15 +12,18 @@ using Microsoft.Xna.Framework.Media;
 
 public partial class Game1 : Game
 {
-    // Effect Parameters
+    // Effect Parameters.
     Matrix World;
     Vector3[] LightPositions;
     Vector4[] LightColors;
     bool cellShading;
 
+    // Parameter for both lighting and postprocessing.
+    float DiffuseIntensity = 2.0f;
+
     // PostProcessing Parameters.
     bool greyScale, gaussian, bloom;
-    float brightnessThreshold = 0.3f;
+    float brightnessThreshold = 1.0f;
 
     private void FillLightingParameters(Effect effect)
     {
@@ -36,11 +39,11 @@ public partial class Game1 : Game
         effect.Parameters["LightColors"].SetValue(LightColors);
 
         // Ambient Lighting.
-        effect.Parameters["AmbientColor"].SetValue(Color.DarkBlue.ToVector4());
+        effect.Parameters["AmbientColor"].SetValue(Color.LightBlue.ToVector4());
         effect.Parameters["AmbientIntensity"].SetValue(0.2f);
 
         // Diffuse Lighting.
-        effect.Parameters["DiffuseIntensity"].SetValue(1.0f);
+        effect.Parameters["DiffuseIntensity"].SetValue(DiffuseIntensity);
 
         // Specular lighting.
         effect.Parameters["SpecularColor"].SetValue(Color.White.ToVector4());

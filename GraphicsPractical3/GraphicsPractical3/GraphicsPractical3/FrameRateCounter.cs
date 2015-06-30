@@ -6,9 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-/// <summary>
-/// This class keeps track of the framerate of the game.
-/// </summary>
+// This class keeps track of the framerate of the game.
 class FrameRateCounter : DrawableGameComponent
 {
     private int frameRate, frameCounter, secondsPassed;
@@ -38,9 +36,7 @@ class FrameRateCounter : DrawableGameComponent
         this.frameCounter++;
     }
 
-    /// <summary>
-    /// Returns the current framerate of the game.
-    /// </summary>
+    // Returns the current framerate of the game.
     public int FrameRate
     {
         get { return this.frameRate; }

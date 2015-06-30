@@ -109,7 +109,11 @@ partial class Game1
         if (bloom)
             hudMessage += "\nBloom: On";
 
-        // Displays some helpful information in case of gaussian blurring
+        // Display if cellshading is on or not.
+        if (cellShading)
+            hudMessage += "\nCellshading: On";
+
+        // Displays some helpful information in case of gaussian blurring.
         if (gaussian)
             hudMessage += "\n-------------------------------------\nRadius: " + radius + "\n    Hold [Y] and press [NUM8] or [NUM2] to change the Radius"
                 + "\nAmount: " + amount + "\n    Hold [H] and press [NUM8] or [NUM2] to change the Amount";

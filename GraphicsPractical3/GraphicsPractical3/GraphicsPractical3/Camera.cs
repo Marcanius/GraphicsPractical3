@@ -6,9 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-/// <summary>
-/// This class is used to control the camera and calculate the corresponding view and projection matrices.
-/// </summary>
+// This class is used to control the camera and calculate the corresponding view and projection matrices.
 class Camera
 {
     // Camera properties.
@@ -33,7 +31,7 @@ class Camera
         this.focus = camFocus;
 
         // Create matrices.
-        this.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspectRatio, 1f, 300.0f);
+        this.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspectRatio, 1f, 3000.0f);
         this.updateViewMatrix();
         this.UpdateFocus();
     }
@@ -95,9 +93,7 @@ class Camera
         this.Focus = this.Focus + Direction * moveSpeed * TimeStep;
     }
 
-    /// <summary>
-    /// Updates the focus of the camera, using both the horizontal and the vertical angle to place the focus at the correct position in front of the camera.
-    /// </summary>
+    // Updates the focus of the camera, using both the horizontal and the vertical angle to place the focus at the correct position in front of the camera.
     private void UpdateFocus()
     {
         Vector3 relativeFocus = new Vector3((float)Math.Cos(angleH), 0, (float)Math.Sin(angleH));
@@ -108,52 +104,39 @@ class Camera
 
     #endregion
 
-    /// <summary>
-    /// Recalculates the view matrix from the up, eye and focus vectors.
-    /// </summary>
+    // Recalculates the view matrix from the up, eye and focus vectors.
     private void updateViewMatrix()
     {
         this.viewMatrix = Matrix.CreateLookAt(eye, focus, up);
     }
 
-    /// <summary>
-    /// Current position of the camera.
-    /// </summary>
+    // Current position of the camera.
     public Vector3 Eye
     {
         get { return this.eye; }
         set { this.eye = value; this.updateViewMatrix(); }
     }
 
-    /// <summary>
-    /// The point the camera is looking at.
-    /// </summary>
+    // The point the camera is looking at.
     public Vector3 Focus
     {
         get { return this.focus; }
         set { this.focus = value; this.updateViewMatrix(); }
     }
 
-    /// <summary>
-    /// The calculated view matrix.
-    /// </summary>
+    // The calculated view matrix.
     public Matrix ViewMatrix
     {
         get { return this.viewMatrix; }
     }
 
-    /// <summary>
-    /// The calculated projection matrix.
-    /// </summary>
+    // The calculated projection matrix.
     public Matrix ProjectionMatrix
     {
         get { return this.projectionMatrix; }
     }
 
-    /// <summary>
-    /// Sets the view and projection matrices in the effect and also the cameraposition if the CameraPosition global is found.
-    /// </summary>
-    /// <param name="effect">The effect to set the parameters of.</param>
+    // Sets the view and projection matrices in the effect and also the cameraposition if the CameraPosition global is found.
     public void SetEffectParameters(Effect effect)
     {
         // Set the right matrices in the effect.

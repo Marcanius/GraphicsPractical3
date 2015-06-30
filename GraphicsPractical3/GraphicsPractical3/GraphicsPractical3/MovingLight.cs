@@ -24,6 +24,7 @@ public class MovingLight
 
     public void Update(GameTime gT)
     {
+        // Adjust the position of the lightsource.
         angle += Speed * (float)gT.ElapsedGameTime.TotalMilliseconds / 1000;
         this.Position = Origin + new Vector3(
             (float)Math.Cos((angle + Offset) * 2 * MathHelper.Pi), 

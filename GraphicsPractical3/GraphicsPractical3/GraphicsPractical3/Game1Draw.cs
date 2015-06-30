@@ -7,16 +7,6 @@ using Microsoft.Xna.Framework.Graphics;
 
 partial class Game1
 {
-    // PostProcessing Pipeline:
-    // Ambient Occlusion
-    // Screen Space reflections.
-    // Tone Mapping.
-    // HDR BLoom / Glare.
-    // Depth of Field.
-    // Film Grain / vignetting / chromatic abberration.
-    // Color grading
-    // Gamma correction.
-
     protected override void Draw(GameTime gameTime)
     {
         // Create the texture for post-processing.
@@ -28,7 +18,7 @@ partial class Game1
 
         #region Post Processing
 
-        // Clear the screen
+        // Clear the screen.
         GraphicsDevice.SetRenderTarget(null);
         Texture2D intermediateResult = (Texture2D)sceneRender;
         GraphicsDevice.Clear(Color.Black);
@@ -84,8 +74,9 @@ partial class Game1
         // Get a clear background.
         GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.DeepSkyBlue, 1.0f, 0);
 
-        // Prepare The Quad.
-        //lighting.CurrentTechnique = lighting.Techniques["Technique1"];
+        // Set the world matrix.
+        lighting.Parameters["World"].SetValue(quadTransform);
+        lighting.Parameters["WorldIT"].SetValue(quadTransform);
 
         foreach (EffectPass pass in lighting.CurrentTechnique.Passes)
             pass.Apply();
@@ -97,6 +88,12 @@ partial class Game1
         // Draw the Box.
         for (int i = 0; i < boxes.Count; i++)
         {
+            lighting.Parameters["World"].SetValue(boxTransform[i]);
+            lighting.Parameters["WorldIT"].SetValue(Matrix.Transpose(Matrix.Invert(boxTransform[i])));
+
+            foreach (EffectPass pass in lighting.CurrentTechnique.Passes)
+                pass.Apply();
+
             this.GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, boxes[i],
                 0, boxes[i].Length, boxIndices, 0, this.boxIndices.Length / 3);
         }
@@ -108,13 +105,7 @@ partial class Game1
         DrawModel(head, 0.1f, new Vector3(0, 10, 0));
 
         // Draw the logo.
-        mjp.Draw(GraphicsDevice);
-
-        World = quadTransform * Matrix.CreateTranslation(new Vector3(0, 10, 0));
-        FillLightingParameters(lighting);
-
-        foreach (EffectPass pass in lighting.CurrentTechnique.Passes)
-            pass.Apply();
+        mjp.Draw(GraphicsDevice, lighting);
     }
 
     // Applies the correct parameters to each effect and draws a model.
@@ -143,6 +134,7 @@ partial class Game1
         // Set the post effect parameters.
         postProcessing.CurrentTechnique = postProcessing.Techniques["GaussianH"];
         postProcessing.Parameters["screenGrab"].SetValue(inputTexture);
+        CalculateOffsetAndWeight(400, 300);
         postProcessing.Parameters["weight"].SetValue(weights);
         postProcessing.Parameters["offsetHor"].SetValue(offsetHor);
         postProcessing.Parameters["offsetVer"].SetValue(offsetVer);
@@ -183,8 +175,9 @@ partial class Game1
 
         // Create a texture without any dark colors.
         postProcessing.CurrentTechnique = postProcessing.Techniques["BrightFilter"];
-        postProcessing.Parameters["screenGrab"].SetValue(inputTexture); 
+        postProcessing.Parameters["screenGrab"].SetValue(inputTexture);
         postProcessing.Parameters["brightnessThreshold"].SetValue(brightnessThreshold);
+        postProcessing.Parameters["DiffuseIntensity"].SetValue(DiffuseIntensity);
 
         spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postProcessing);
         spriteBatch.Draw(inputTexture, new Rectangle(0, 0, bloomRenderBright.Width, bloomRenderBright.Height), Color.White);
@@ -194,14 +187,14 @@ partial class Game1
         // Render the texture again, to a new target, and with a smaller scale.
         int prevRadius = this.radius;
         float prevAmount = this.amount;
-        this.radius = 1;
-        this.amount = 1;
+        this.radius = 5;
+        this.amount = 5;
 
         helpDraw(bloomRenderBlurH, bloomRenderBlurHV, bloomRenderBright);
         helpDraw(bloomRender2BlurH, bloomRender2BlurHV, bloomRenderBright);
         helpDraw(bloomRender4BlurH, bloomRender4BlurHV, bloomRenderBright);
         helpDraw(bloomRender8BlurH, bloomRender8BlurHV, bloomRenderBright);
-        
+
         // Render the final result, sampling all the smaller blurred images.
         GraphicsDevice.SetRenderTarget(bloomRenderFinish);
         GraphicsDevice.Clear(Color.Black);

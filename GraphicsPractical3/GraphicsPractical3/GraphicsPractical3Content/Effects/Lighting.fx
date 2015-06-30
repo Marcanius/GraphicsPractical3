@@ -47,10 +47,10 @@ struct VertexShaderOutput
 
 float4 DiffuseShading(float3 Position, float3 Normal, float3 LightPosition, float4 LightColor)
 {
-	float distance = length(LightPosition - Position);
+	//float distance = length(LightPosition - Position);
 	float LdotNN = dot(normalize(LightPosition - Position), Normal);
 
-	return LightColor * (DiffuseIntensity * max(0.0f, LdotNN)) * (1/pow(distance,2));
+	return LightColor * (DiffuseIntensity * max(0.0f, LdotNN));// *(1 / pow(distance, 2));
 }
 
 // --------------------------------------- The Vertex Shader --------------------------------------- \\
@@ -60,11 +60,11 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 	VertexShaderOutput output;
 
 	float4 worldPosition = mul(input.Position, World);
-		float4 viewPosition = mul(worldPosition, View);
-		output.Position = mul(viewPosition, Projection);
+	float4 viewPosition = mul(worldPosition, View);
+	output.Position = mul(viewPosition, Projection);
 
 	output.Position3D = worldPosition;
-	output.Normal = input.Normal;
+	output.Normal = normalize(mul(input.Normal, WorldIT));
 
 	return output;
 }
@@ -86,15 +86,18 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		output.b = max(output.b, comparison.b);
 	}
 
+	// We lose precision in the color values by first mutiplying by 3 and losing the decimal and then divide by 3.
 	if (cellShading)
 	{
-		output.r = float((int)(output.r * 3)) / 3;
-		output.g = float((int)(output.g * 3)) / 3;
-		output.b = float((int)(output.b * 3)) / 3;
+		output.r = float((int)(output.r * 5)) / 5;
+		output.g = float((int)(output.g * 5)) / 5;
+		output.b = float((int)(output.b * 5)) / 5;
 	}
 
+	// We divide by the diffuse intensity, because this is the highest value our colors can get.
+	output /= DiffuseIntensity;
+
 	return output;
-	return (1, 0, 1, 1);
 }
 
 technique Technique1

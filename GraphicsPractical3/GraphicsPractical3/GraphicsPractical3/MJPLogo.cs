@@ -12,6 +12,7 @@ public class MJPLogo
     #region Variables
     VertexPositionNormalTexture[] listVertices;
     short[] listIndices;
+    public Matrix Transform;
 
     #endregion
 
@@ -107,9 +108,16 @@ public class MJPLogo
         return result.ToArray();
     }
 
-    public void Draw(GraphicsDevice GraphicsDevice)
+    public void Draw(GraphicsDevice GraphicsDevice, Effect lighting)
     {
-        // Draw the bottom.
+        // Set the world matrices.
+        lighting.Parameters["World"].SetValue(Transform);
+        lighting.Parameters["WorldIT"].SetValue(Matrix.Transpose(Matrix.Invert(Transform)));
+
+        foreach (EffectPass pass in lighting.CurrentTechnique.Passes)
+            pass.Apply();
+
+        // Draw the shape.
         GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, listVertices,
             0, listVertices.Length, listIndices, 0, this.listIndices.Length / 3);
     }
